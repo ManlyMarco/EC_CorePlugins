@@ -1,4 +1,4 @@
-﻿namespace ECCorePlugins
+﻿namespace EC.Core
 {
     internal static class Metadata
     {

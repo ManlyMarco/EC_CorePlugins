@@ -1,12 +1,11 @@
 ﻿using BepInEx;
-using ECCorePlugins;
 
-namespace Screencap
+namespace EC.Core.Screencap
 {
     [BepInPlugin(GUID, "Screenshot Manager", Metadata.PluginsVersion)]
     public class ScreenshotManager : BaseUnityPlugin
     {
-        public const string GUID = "com.bepis.bepinex.screenshotmanager";
+        public const string GUID = "EC.Core.Screencap";
 
         private void Awake()
         {
