@@ -17,7 +17,7 @@ namespace EC.Core.Screencap
     [BepInPlugin(GUID, "Screenshot Manager", Version)]
     public partial class ScreenshotManager : BaseUnityPlugin
     {
-        public const string GUID = "com.bepis.bepinex.screenshotmanager";
+        public const string GUID = "EC.Core.Screencap";
         public const string Version = Metadata.PluginsVersion;
         public string ScreenshotDir { get; } = Path.Combine(Paths.GameRootPath, "UserData\\cap\\");
 

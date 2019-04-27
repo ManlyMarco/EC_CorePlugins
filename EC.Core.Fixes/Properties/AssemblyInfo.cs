@@ -5,9 +5,9 @@ using EC.Core.Internal;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EC.Core.Screencap")]
+[assembly: AssemblyTitle("EC.Core.Fixes")]
 [assembly: AssemblyCompany(Metadata.CompanyName)]
-[assembly: AssemblyProduct("EC.Core.Screencap")]
+[assembly: AssemblyProduct("EC.Core.Fixes")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,7 +16,7 @@ using EC.Core.Internal;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4c3d3b27-00f5-42d3-85d7-82de04479848")]
+[assembly: Guid("f64fb505-1dad-4ffb-9f48-09bb687c74dc")]
 
 // Version information for an assembly consists of the following four values:
 //
