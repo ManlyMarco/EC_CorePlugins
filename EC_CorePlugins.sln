@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Screencap", "Screencap\Screencap.csproj", "{4C3D3B27-00F5-42D3-85D7-82DE04479848}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{C2678710-4D0E-40BA-AAC3-EB77E841D2B9}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared\Shared.projitems*{4c3d3b27-00f5-42d3-85d7-82de04479848}*SharedItemsImports = 4
+		Shared\Shared.projitems*{c2678710-4d0e-40ba-aac3-eb77e841d2b9}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C3D3B27-00F5-42D3-85D7-82DE04479848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C3D3B27-00F5-42D3-85D7-82DE04479848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C3D3B27-00F5-42D3-85D7-82DE04479848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C3D3B27-00F5-42D3-85D7-82DE04479848}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {49365589-3B47-409B-89E7-458D3A4FFEB6}
+	EndGlobalSection
+EndGlobal
