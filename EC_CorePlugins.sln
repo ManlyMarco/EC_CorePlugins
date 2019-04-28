@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Sideloader", "EC.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.ExtensibleSaveFormat", "EC.Core.ExtensibleSaveFormat\EC.Core.ExtensibleSaveFormat.csproj", "{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NullChecks", "EC.Core.Fixes.NullChecks\EC.Core.Fixes.NullChecks.csproj", "{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
