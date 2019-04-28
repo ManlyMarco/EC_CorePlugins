@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.156
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Screencap", "EC.Core.Screencap\EC.Core.Screencap.csproj", "{4C3D3B27-00F5-42D3-85D7-82DE04479848}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.ResourceRedirector", "EC.Core.ResourceRedirector\EC.Core.ResourceRedirector.csproj", "{B6F74922-41A6-4BD6-9A03-ECC0D631E088}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Sideloader", "EC.Core.Sideloader\EC.Core.Sideloader.csproj", "{687D6C36-4834-45A9-8639-14B718F308C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.ExtensibleSaveFormat", "EC.Core.ExtensibleSaveFormat\EC.Core.ExtensibleSaveFormat.csproj", "{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{687D6C36-4834-45A9-8639-14B718F308C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{687D6C36-4834-45A9-8639-14B718F308C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{687D6C36-4834-45A9-8639-14B718F308C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
