@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Screencap", "EC.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core", "EC.Core\EC.Core.csproj", "{41A43E0E-4758-4986-B5D9-9FEDF3A32F65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.CultureFix", "EC.Core.Fixes\EC.Core.Fixes.CultureFix.csproj", "{F64FB505-1DAD-4FFB-9F48-09BB687C74DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.CultureFix", "EC.Core.Fixes.CultureFix\EC.Core.Fixes.CultureFix.csproj", "{F64FB505-1DAD-4FFB-9F48-09BB687C74DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.SliderUnlocker", "EC.Core.SliderUnlocker\EC.Core.SliderUnlocker.csproj", "{177A65D8-4A40-447E-87EA-551C04BCD110}"
 EndProject
