@@ -19,7 +19,7 @@ namespace EC.Core.ConfigExtensions
 
         private KeyboardShortcut _last;
 
-        private static readonly string KeybindCategoryName = "Keyboard shortcut";
+        private static readonly string KeybindCategoryName = "Keyboard shortcuts";
 
         public SavedKeyboardShortcut(ConfigFile file, string key, string description, KeyboardShortcut defaultShortcut)
         {
