@@ -47,7 +47,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\Universal\RuntimeUnityEditor\Libs\v5\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\lib\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
