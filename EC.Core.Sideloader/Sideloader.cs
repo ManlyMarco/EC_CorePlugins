@@ -15,7 +15,7 @@ using UnityEngine;
 namespace EC.Core.Sideloader
 {
     [BepInDependency(ResourceRedirector.ResourceRedirector.GUID)]
-    //[BepInDependency(ExtensibleSaveFormat.ExtendedSave.GUID)]
+    [BepInDependency(ExtensibleSaveFormat.ExtendedSave.GUID)]
     [BepInPlugin(GUID, PluginName, Version)]
     public class Sideloader : BaseUnityPlugin
     {

@@ -95,6 +95,10 @@
     <Compile Include="UniversalAutoResolver\UAR.StructValue.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EC.Core.ExtensibleSaveFormat\EC.Core.ExtensibleSaveFormat.csproj">
+      <Project>{9e2934ea-9be2-40d7-afdd-d6b96ff4317c}</Project>
+      <Name>EC.Core.ExtensibleSaveFormat</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EC.Core.ResourceRedirector\EC.Core.ResourceRedirector.csproj">
       <Project>{b6f74922-41a6-4bd6-9a03-ecc0d631e088}</Project>
       <Name>EC.Core.ResourceRedirector</Name>

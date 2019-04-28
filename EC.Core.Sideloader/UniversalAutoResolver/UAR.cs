@@ -89,8 +89,8 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                             if (ListLoader.InternalDataList[kv.Key.Category].ContainsKey(kv.Value.GetMethod(structure)))
                             {
                                 string mainAB = ListLoader.InternalDataList[kv.Key.Category][kv.Value.GetMethod(structure)].dictInfo[(int)ChaListDefine.KeyType.MainAB];
-                                mainAB = mainAB.Replace("chara/", "").Replace(".unity3d", "").Replace(kv.Key.Category.ToString() + "_", "");
-
+                                mainAB = mainAB.Replace("chara/", "").Replace(".unity3d", "").Replace(kv.Key.Category.ToString() + "_", "").Replace("/", "");
+                                Sideloader.Logger.Log(LogLevel.Info, mainAB);
                                 if (int.TryParse(mainAB, out int x))
                                 {
                                     //ID found but it conflicts with a vanilla item. Change the ID to avoid conflicts.
