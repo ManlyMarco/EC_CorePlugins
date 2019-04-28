@@ -20,20 +20,39 @@ namespace EC.Core.ExtensibleSaveFormat
         /// </summary>
         public static bool LoadEventsEnabled = true;
 
-        internal static WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>> internalCharaDictionary = new WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>>();
-        internal static WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>> internalCoordinateDictionary = new WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>>();
+        private static readonly WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>> _internalCharaDictionary = 
+            new WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>>();
+
+        private static readonly WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateDictionary = 
+            new WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>>();
+
+        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFile, Dictionary<string, PluginData>> _internalCharaImportDictionary = 
+            new WeakKeyDictionary<KoikatsuCharaFile.ChaFile, Dictionary<string, PluginData>>();
+
+        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateImportDictionary = 
+            new WeakKeyDictionary<KoikatsuCharaFile.ChaFileCoordinate, Dictionary<string, PluginData>>();
 
         #region Events
 
         public delegate void CardEventHandler(ChaFile file);
+        public delegate void CoordinateEventHandler(ChaFileCoordinate file);
+        public delegate void ImportEventHandler(Dictionary<string, PluginData> importedExtendedData);
 
         public static event CardEventHandler CardBeingSaved;
         public static event CardEventHandler CardBeingLoaded;
-
-        public delegate void CoordinateEventHandler(ChaFileCoordinate file);
+        /// <summary>
+        /// Contains all extended data read from the KK card. Key is data GUID.
+        /// Convert your data and write it back to the dictionary to get it saved.
+        /// </summary>
+        public static event ImportEventHandler CardBeingImported;
 
         public static event CoordinateEventHandler CoordinateBeingSaved;
         public static event CoordinateEventHandler CoordinateBeingLoaded;
+        /// <summary>
+        /// Contains all extended data read from the KK card. Key is data GUID.
+        /// Convert your data and write it back to the dictionary to get it saved.
+        /// </summary>
+        public static event ImportEventHandler CoordinateBeingImported;
 
         private void Awake()
         {
@@ -41,7 +60,7 @@ namespace EC.Core.ExtensibleSaveFormat
             Hooks.InstallHooks();
         }
 
-        internal static void cardWriteEvent(ChaFile file)
+        private static void CardWriteEvent(ChaFile file)
         {
             if (CardBeingSaved == null)
                 return;
@@ -60,7 +79,7 @@ namespace EC.Core.ExtensibleSaveFormat
             }
         }
 
-        internal static void cardReadEvent(ChaFile file)
+        private static void CardReadEvent(ChaFile file)
         {
             if (!LoadEventsEnabled || CardBeingLoaded == null)
                 return;
@@ -79,7 +98,26 @@ namespace EC.Core.ExtensibleSaveFormat
             }
         }
 
-        internal static void coordinateWriteEvent(ChaFileCoordinate file)
+        private static void CardImportEvent(Dictionary<string, PluginData> data)
+        {
+            if (CardBeingImported != null)
+            {
+                foreach (var entry in CardBeingImported.GetInvocationList())
+                {
+                    var handler = (ImportEventHandler) entry;
+                    try
+                    {
+                        handler.Invoke(data);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Log(LogLevel.Error, $"Subscriber crash in {nameof(ExtendedSave)}.{nameof(CardBeingLoaded)} - {ex}");
+                    }
+                }
+            }
+        }
+
+        private static void CoordinateWriteEvent(ChaFileCoordinate file)
         {
             if (CoordinateBeingSaved == null)
                 return;
@@ -98,7 +136,7 @@ namespace EC.Core.ExtensibleSaveFormat
             }
         }
 
-        internal static void coordinateReadEvent(ChaFileCoordinate file)
+        private static void CoordinateReadEvent(ChaFileCoordinate file)
         {
             if (!LoadEventsEnabled || CoordinateBeingLoaded == null)
                 return;
@@ -117,16 +155,35 @@ namespace EC.Core.ExtensibleSaveFormat
             }
         }
 
+        private static void CoordinateImportEvent(Dictionary<string, PluginData> data)
+        {
+            if (CoordinateBeingImported != null)
+            {
+                foreach (var entry in CoordinateBeingImported.GetInvocationList())
+                {
+                    var handler = (ImportEventHandler)entry;
+                    try
+                    {
+                        handler.Invoke(data);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Log(LogLevel.Error, $"Subscriber crash in {nameof(ExtendedSave)}.{nameof(CardBeingLoaded)} - {ex}");
+                    }
+                }
+            }
+        }
+
         #endregion
 
         public static Dictionary<string, PluginData> GetAllExtendedData(ChaFile file)
         {
-            return internalCharaDictionary.Get(file);
+            return _internalCharaDictionary.Get(file);
         }
 
         public static Dictionary<string, PluginData> GetAllExtendedData(ChaFileCoordinate file)
         {
-            return internalCoordinateDictionary.Get(file);
+            return _internalCoordinateDictionary.Get(file);
         }
 
         public static PluginData GetExtendedDataById(ChaFile file, string id)
@@ -134,7 +191,7 @@ namespace EC.Core.ExtensibleSaveFormat
             if (file == null || id == null)
                 return null;
 
-            var dict = internalCharaDictionary.Get(file);
+            var dict = _internalCharaDictionary.Get(file);
 
             if (dict != null && dict.TryGetValue(id, out var extendedSection))
                 return extendedSection;
@@ -144,12 +201,12 @@ namespace EC.Core.ExtensibleSaveFormat
 
         public static void SetExtendedDataById(ChaFile file, string id, PluginData extendedFormatData)
         {
-            var chaDictionary = internalCharaDictionary.Get(file);
+            var chaDictionary = _internalCharaDictionary.Get(file);
 
             if (chaDictionary == null)
             {
                 chaDictionary = new Dictionary<string, PluginData>();
-                internalCharaDictionary.Set(file, chaDictionary);
+                _internalCharaDictionary.Set(file, chaDictionary);
             }
 
             chaDictionary[id] = extendedFormatData;
@@ -160,7 +217,7 @@ namespace EC.Core.ExtensibleSaveFormat
             if (file == null || id == null)
                 return null;
 
-            var dict = internalCoordinateDictionary.Get(file);
+            var dict = _internalCoordinateDictionary.Get(file);
 
             if (dict != null && dict.TryGetValue(id, out var extendedSection))
                 return extendedSection;
@@ -170,12 +227,12 @@ namespace EC.Core.ExtensibleSaveFormat
 
         public static void SetExtendedDataById(ChaFileCoordinate file, string id, PluginData extendedFormatData)
         {
-            var chaDictionary = internalCoordinateDictionary.Get(file);
+            var chaDictionary = _internalCoordinateDictionary.Get(file);
 
             if (chaDictionary == null)
             {
                 chaDictionary = new Dictionary<string, PluginData>();
-                internalCoordinateDictionary.Set(file, chaDictionary);
+                _internalCoordinateDictionary.Set(file, chaDictionary);
             }
 
             chaDictionary[id] = extendedFormatData;

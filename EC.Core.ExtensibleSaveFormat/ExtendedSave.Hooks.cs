@@ -19,8 +19,6 @@ namespace EC.Core.ExtensibleSaveFormat
             public static readonly string Marker = "KKEx";
             public static readonly int Version = 3;
 
-            private static bool _cardReadEventCalled;
-
             public static void InstallHooks()
             {
                 HarmonyWrapper.PatchAll(typeof(Hooks));
@@ -29,14 +27,7 @@ namespace EC.Core.ExtensibleSaveFormat
             #region ChaFile
 
             #region Loading
-
-            [HarmonyPrefix]
-            [HarmonyPatch(typeof(ChaFile), "LoadFile", typeof(BinaryReader), typeof(int), typeof(bool), typeof(bool))]
-            public static void ChaFileLoadFilePreHook(ChaFile __instance, BinaryReader br, int lang, bool noLoadPNG, bool noLoadStatus)
-            {
-                _cardReadEventCalled = false;
-            }
-
+            
             public static void ChaFileLoadFileHook(ChaFile file, BlockHeader header, BinaryReader reader)
             {
                 var info = header.SearchInfo(Marker);
@@ -48,27 +39,27 @@ namespace EC.Core.ExtensibleSaveFormat
 
                     reader.BaseStream.Position = basePosition + info.pos;
 
-                    var data = reader.ReadBytes((int) info.size);
+                    var data = reader.ReadBytes((int)info.size);
 
                     reader.BaseStream.Position = originalPosition;
-
-                    _cardReadEventCalled = true;
 
                     try
                     {
                         var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(data);
-                        internalCharaDictionary.Set(file, dictionary);
+                        _internalCharaDictionary.Set(file, dictionary);
                     }
                     catch (Exception e)
                     {
-                        internalCharaDictionary.Set(file, new Dictionary<string, PluginData>());
+                        _internalCharaDictionary.Set(file, new Dictionary<string, PluginData>());
                         _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card \"{file.charaFileName}\" - {e.Message}");
                     }
-
-                    cardReadEvent(file);
                 }
                 else
-                    internalCharaDictionary.Set(file, new Dictionary<string, PluginData>());
+                {
+                    _internalCharaDictionary.Set(file, new Dictionary<string, PluginData>());
+                }
+
+                CardReadEvent(file);
             }
 
             [HarmonyTranspiler]
@@ -83,7 +74,7 @@ namespace EC.Core.ExtensibleSaveFormat
                 //get the index of the last seek call
                 var lastSeekIndex = newInstructionSet.FindLastIndex(instruction => CheckCallVirtName(instruction, "Seek"));
 
-                var blockHeaderLocalBuilder = (LocalBuilder) newInstructionSet[searchInfoIndex - 2].operand; //get the localbuilder for the blockheader
+                var blockHeaderLocalBuilder = (LocalBuilder)newInstructionSet[searchInfoIndex - 2].operand; //get the localbuilder for the blockheader
 
                 //insert our own hook right after the last seek
                 newInstructionSet.InsertRange(
@@ -99,18 +90,120 @@ namespace EC.Core.ExtensibleSaveFormat
                 return newInstructionSet;
             }
 
+            #endregion
+
+            #region ImportingKK
+
             [HarmonyPostfix]
-            [HarmonyPatch(typeof(ChaFile), "LoadFile", typeof(BinaryReader), typeof(int), typeof(bool), typeof(bool))]
-            public static void ChaFileLoadFilePostHook(ChaFile __instance, bool __result, BinaryReader br, int lang, bool noLoadPNG, bool noLoadStatus)
+            [HarmonyPatch(typeof(ConvertChaFile), nameof(ConvertChaFile.ConvertCharaFile))]
+            public static void ConvertChaFilePostHook(ChaFileControl cfc, KoikatsuCharaFile.ChaFile kkfile)
+            {
+                // Move data from import dictionary to normal dictionary before the imported cards are saved so the imported data is written
+                var result = _internalCharaImportDictionary.Get(kkfile);
+                if (result != null)
+                {
+                    CardImportEvent(result);
+                    _internalCharaDictionary.Set(cfc, result);
+                }
+            }
+            
+            public static void KKChaFileLoadFileHook(KoikatsuCharaFile.ChaFile file, BlockHeader header, BinaryReader reader)
+            {
+                var info = header.SearchInfo(Marker);
+
+                if (info != null && info.version == Version.ToString())
+                {
+                    var originalPosition = reader.BaseStream.Position;
+                    var basePosition = originalPosition - header.lstInfo.Sum(x => x.size);
+
+                    reader.BaseStream.Position = basePosition + info.pos;
+
+                    var data = reader.ReadBytes((int)info.size);
+
+                    reader.BaseStream.Position = originalPosition;
+                    
+                    try
+                    {
+                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(data);
+                        _internalCharaImportDictionary.Set(file, dictionary);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card \"{file.charaFileName}\" - {e.Message}");
+                    }
+                }
+            }
+
+            [HarmonyTranspiler]
+            [HarmonyPatch(typeof(KoikatsuCharaFile.ChaFile), "LoadFile", typeof(BinaryReader), typeof(bool), typeof(bool))]
+            public static IEnumerable<CodeInstruction> KKChaFileLoadFileTranspiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var newInstructionSet = new List<CodeInstruction>(instructions);
+
+                //get the index of the first searchinfo call
+                var searchInfoIndex = newInstructionSet.FindIndex(instruction => CheckCallVirtName(instruction, "SearchInfo"));
+
+                //get the index of the last seek call
+                var lastSeekIndex = newInstructionSet.FindLastIndex(instruction => CheckCallVirtName(instruction, "Seek"));
+
+                var blockHeaderLocalBuilder = (LocalBuilder)newInstructionSet[searchInfoIndex - 2].operand; //get the localbuilder for the blockheader
+
+                //insert our own hook right after the last seek
+                newInstructionSet.InsertRange(
+                    lastSeekIndex + 2, //we insert AFTER the NEXT instruction, which is right before the try block exit
+                    new[]
+                    {
+                        new CodeInstruction(OpCodes.Ldarg_0), //push the ChaFile instance
+                        new CodeInstruction(OpCodes.Ldloc_S, blockHeaderLocalBuilder), //push the BlockHeader instance
+                        new CodeInstruction(OpCodes.Ldarg_1, blockHeaderLocalBuilder), //push the binaryreader instance
+                        new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(KKChaFileLoadFileHook))) //call our hook
+                    });
+
+                return newInstructionSet;
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(KoikatsuCharaFile.ChaFile), "LoadFile", typeof(BinaryReader), typeof(bool), typeof(bool))]
+            public static void KKChaFileLoadFilePostHook(KoikatsuCharaFile.ChaFile __instance, bool __result, BinaryReader br, bool noLoadPNG, bool noLoadStatus)
             {
                 if (!__result)
                     return;
 
-                //If the event wasn't called at this point, it means the card doesn't contain any data, but we still need to call the even for consistency.
-                if (_cardReadEventCalled == false)
+                //Compatibility for ver 1 and 2 ext save data
+                if (br.BaseStream.Position != br.BaseStream.Length)
                 {
-                    internalCharaDictionary.Set(__instance, new Dictionary<string, PluginData>());
-                    cardReadEvent(__instance);
+                    long originalPosition = br.BaseStream.Position;
+
+                    try
+                    {
+                        string marker = br.ReadString();
+                        int version = br.ReadInt32();
+
+                        if (marker == "KKEx" && version == 2)
+                        {
+                            int length = br.ReadInt32();
+
+                            if (length > 0)
+                            {
+                                byte[] bytes = br.ReadBytes(length);
+                                var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
+
+                                _internalCharaImportDictionary.Set(__instance, dictionary);
+                            }
+                        }
+                        else
+                        {
+                            br.BaseStream.Position = originalPosition;
+                        }
+                    }
+                    catch (EndOfStreamException)
+                    {
+                        /* Incomplete/non-existant data */
+                    }
+                    catch (SystemException)
+                    {
+                        /* Invalid/unexpected deserialized data */
+                    }
                 }
             }
 
@@ -124,7 +217,7 @@ namespace EC.Core.ExtensibleSaveFormat
             [HarmonyPatch(typeof(ChaFile), "SaveFile", typeof(BinaryWriter), typeof(bool), typeof(int))]
             public static void ChaFileSaveFilePreHook(ChaFile __instance, bool __result, BinaryWriter bw, bool savePng, int lang)
             {
-                cardWriteEvent(__instance);
+                CardWriteEvent(__instance);
             }
 
             public static void ChaFileSaveFileHook(ChaFile file, BlockHeader header, ref long[] array3)
@@ -186,8 +279,8 @@ namespace EC.Core.ExtensibleSaveFormat
                                instruction.operand.ToString() == "System.Int64";
                     });
 
-                var blockHeaderLocalBuilder = (LocalBuilder) newInstructionSet[blockHeaderIndex + 1].operand; //get the local index for the block header
-                var array3LocalBuilder = (LocalBuilder) newInstructionSet[array3Index + 1].operand; //get the local index for array3
+                var blockHeaderLocalBuilder = (LocalBuilder)newInstructionSet[blockHeaderIndex + 1].operand; //get the local index for the block header
+                var array3LocalBuilder = (LocalBuilder)newInstructionSet[array3Index + 1].operand; //get the local index for array3
 
                 //insert our own hook right after the blockheader creation
                 newInstructionSet.InsertRange(
@@ -246,22 +339,88 @@ namespace EC.Core.ExtensibleSaveFormat
                         var bytes = br.ReadBytes(length);
                         var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
 
-                        internalCoordinateDictionary.Set(coordinate, dictionary);
+                        _internalCoordinateDictionary.Set(coordinate, dictionary);
                     }
                     else
-                        internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>()); //Overriding with empty data just in case there is some remnant from former loads.
+                        _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>()); //Overriding with empty data just in case there is some remnant from former loads.
                 }
                 catch (EndOfStreamException)
                 {
                     /* Incomplete/non-existant data */
-                    internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
                 }
                 catch (InvalidOperationException)
                 {
                     /* Invalid/unexpected deserialized data */
-                    internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
                 }
-                coordinateReadEvent(coordinate); //Firing the event in any case
+
+                CoordinateReadEvent(coordinate);
+            }
+
+            #endregion
+            
+            #region ImportKK
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(ConvertChaFile), nameof(ConvertChaFile.ConvertCoordinateFile))]
+            public static void ConvertCoordinateFile(ChaFileCoordinate emcoorde, KoikatsuCharaFile.ChaFileCoordinate kkcoorde)
+            {
+                // Move data from import dictionary to normal dictionary before the imported cards are saved so the imported data is written
+                var result = _internalCoordinateImportDictionary.Get(kkcoorde);
+                if (result != null)
+                {
+                    CoordinateImportEvent(result);
+                    _internalCoordinateDictionary.Set(emcoorde, result);
+                }
+            }
+
+            [HarmonyTranspiler]
+            [HarmonyPatch(typeof(KoikatsuCharaFile.ChaFileCoordinate), nameof(KoikatsuCharaFile.ChaFileCoordinate.LoadFile), typeof(Stream), typeof(bool))]
+            public static IEnumerable<CodeInstruction> KKChaFileCoordinateLoadTranspiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var set = false;
+                var instructionsList = instructions.ToList();
+                for (var i = 0; i < instructionsList.Count; i++)
+                {
+                    var inst = instructionsList[i];
+                    if (set == false && inst.opcode == OpCodes.Ldc_I4_1 && instructionsList[i + 1].opcode == OpCodes.Stloc_1 && instructionsList[i + 2].opcode == OpCodes.Leave)
+                    {
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return new CodeInstruction(OpCodes.Ldloc_0);
+                        yield return new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(KKChaFileCoordinateLoadHook)));
+                        set = true;
+                    }
+
+                    yield return inst;
+                }
+            }
+
+            public static void KKChaFileCoordinateLoadHook(KoikatsuCharaFile.ChaFileCoordinate coordinate, BinaryReader br)
+            {
+                try
+                {
+                    var marker = br.ReadString();
+                    var version = br.ReadInt32();
+
+                    var length = br.ReadInt32();
+
+                    if (marker == Marker && version == Version && length > 0)
+                    {
+                        var bytes = br.ReadBytes(length);
+                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
+
+                        _internalCoordinateImportDictionary.Set(coordinate, dictionary);
+                    }
+                }
+                catch (EndOfStreamException)
+                {
+                    /* Incomplete/non-existant data */
+                }
+                catch (InvalidOperationException)
+                {
+                    /* Invalid/unexpected deserialized data */
+                }
             }
 
             #endregion
@@ -290,7 +449,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
             public static void ChaFileCoordinateSaveHook(ChaFileCoordinate file, BinaryWriter bw)
             {
-                coordinateWriteEvent(file);
+                CoordinateWriteEvent(file);
 
                 _logger.Log(LogLevel.Debug, "Coordinate hook!");
 
