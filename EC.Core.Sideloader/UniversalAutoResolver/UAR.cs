@@ -136,16 +136,16 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
 
                 results.AddRange(propertyKeys.Select(propertyKey =>
                 {
-                    //if (Sideloader.DebugResolveInfoLogging.Value)
-                    //{
-                    //    Sideloader.Logger.Log(LogLevel.Info, $"ResolveInfo - " +
-                    //                              $"GUID: {manifest.GUID} " +
-                    //                              $"Slot: {int.Parse(kv.Value[0])} " +
-                    //                              $"LocalSlot: {newSlot} " +
-                    //                              $"Property: {propertyKey.ToString()} " +
-                    //                              $"CategoryNo: {category} " +
-                    //                              $"Count: {LoadedResolutionInfo.Count()}");
-                    //}
+                    if (Sideloader.DebugResolveInfoLogging.Value)
+                    {
+                        Sideloader.Logger.Log(LogLevel.Info, $"ResolveInfo - " +
+                                                  $"GUID: {manifest.GUID} " +
+                                                  $"Slot: {int.Parse(kv.Value[0])} " +
+                                                  $"LocalSlot: {newSlot} " +
+                                                  $"Property: {propertyKey.ToString()} " +
+                                                  $"CategoryNo: {category} " +
+                                                  $"Count: {LoadedResolutionInfo.Count()}");
+                    }
 
                     return new ResolveInfo
                     {
@@ -165,12 +165,10 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
         {
             if (LoadedResolutionInfo.Any(x => x.GUID == guid))
                 //we have the GUID loaded, so the user has an outdated mod
-                //Sideloader.Logger.Log(LogLevel.Warning | (Sideloader.MissingModWarning.Value ? LogLevel.Message : LogLevel.None), $"[UAR] WARNING! Outdated mod detected! [{guid}]");
-                Sideloader.Logger.Log(LogLevel.Warning, $"[UAR] WARNING! Outdated mod detected! [{guid}]");
+                Sideloader.Logger.Log(LogLevel.Warning | (Sideloader.MissingModWarning.Value ? LogLevel.Message : LogLevel.None), $"[UAR] WARNING! Outdated mod detected! [{guid}]");
             else
                 //did not find a match, we don't have the mod
-                //Sideloader.Logger.Log(LogLevel.Warning | (Sideloader.MissingModWarning.Value ? LogLevel.Message : LogLevel.None), $"[UAR] WARNING! Missing mod detected! [{guid}]");
-                Sideloader.Logger.Log(LogLevel.Warning, $"[UAR] WARNING! Missing mod detected! [{guid}]");
+                Sideloader.Logger.Log(LogLevel.Warning | (Sideloader.MissingModWarning.Value ? LogLevel.Message : LogLevel.None), $"[UAR] WARNING! Missing mod detected! [{guid}]");
         }
     }
 }

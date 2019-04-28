@@ -290,8 +290,8 @@ namespace EC.Core.Sideloader
                         {
                             long index = (long)locateZipEntryMethodInfo.Invoke(arc, new object[] { entry });
 
-                            //if (DebugLogging.Value)
-                            Logger.Log(LogLevel.Debug, $"[SIDELOADER] Streaming {entry.Name} ({archiveFilename}) unity3d file from disk, offset {index}");
+                            if (DebugLogging.Value)
+                                Logger.Log(LogLevel.Debug, $"[SIDELOADER] Streaming {entry.Name} ({archiveFilename}) unity3d file from disk, offset {index}");
 
                             bundle = AssetBundle.LoadFromFile(archiveFilename, 0, (ulong)index);
                         }
