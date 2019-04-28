@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.SliderUnlocker", "E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.ResourceRedirector", "EC.Core.ResourceRedirector\EC.Core.ResourceRedirector.csproj", "{B6F74922-41A6-4BD6-9A03-ECC0D631E088}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Sideloader", "EC.Core.Sideloader\EC.Core.Sideloader.csproj", "{687D6C36-4834-45A9-8639-14B718F308C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B6F74922-41A6-4BD6-9A03-ECC0D631E088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6F74922-41A6-4BD6-9A03-ECC0D631E088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6F74922-41A6-4BD6-9A03-ECC0D631E088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{687D6C36-4834-45A9-8639-14B718F308C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{687D6C36-4834-45A9-8639-14B718F308C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{687D6C36-4834-45A9-8639-14B718F308C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{687D6C36-4834-45A9-8639-14B718F308C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
