@@ -66,10 +66,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\lib\UnityEngine.dll</HintPath>
@@ -98,6 +94,7 @@
     <ProjectReference Include="..\EC.Core.ExtensibleSaveFormat\EC.Core.ExtensibleSaveFormat.csproj">
       <Project>{9e2934ea-9be2-40d7-afdd-d6b96ff4317c}</Project>
       <Name>EC.Core.ExtensibleSaveFormat</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\EC.Core.ResourceRedirector\EC.Core.ResourceRedirector.csproj">
       <Project>{b6f74922-41a6-4bd6-9a03-ecc0d631e088}</Project>
@@ -122,4 +119,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ILRepack.Lib.MSBuild.Task.2.0.16.1\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.Lib.MSBuild.Task.2.0.16.1\build\ILRepack.Lib.MSBuild.Task.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>del /q /f "$(TargetDir)ICSharpCode.SharpZipLib.pdb"
+del /q /f "$(TargetDir)ICSharpCode.SharpZipLib.xml"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -15,7 +15,7 @@ namespace EC.Core
         public static T DeepCopy<T>(this T self)
         {
             if (self == null)
-                return default;
+                return default(T);
 
             MemoryStream memoryStream = new MemoryStream();
             T result;

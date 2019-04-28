@@ -1,18 +1,16 @@
-﻿using BepInEx;
-using ChaCustom;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using BepInEx;
+using BepInEx.Configuration;
+using ChaCustom;
+using EC.Core.ConfigExtensions;
+using EC.Core.Internal;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Harmony;
-using EC.Core.ConfigExtensions;
-using EC.Core.Internal;
-using BepInEx.Configuration;
 
 namespace EC.Core.SliderUnlocker
 {
@@ -25,18 +23,23 @@ namespace EC.Core.SliderUnlocker
 
         /// <summary> Maximum value sliders can possibly extend </summary>
         internal static float SliderAbsoluteMax => Math.Max(SliderMax, 5f);
+
         /// <summary> Minimum value sliders can possibly extend </summary>
         internal static float SliderAbsoluteMin => Math.Min(SliderMin, -5f);
+
         /// <summary> Maximum value of sliders when not dynamically unlocked </summary>
         internal static float SliderMax => (Maximum.Value < 100 ? 100 : Maximum.Value) / 100f;
+
         /// <summary> Minimum value of sliders when not dynamically unlocked </summary>
         internal static float SliderMin => (Minimum.Value > 0 ? 0 : Minimum.Value) / 100f;
 
         private static readonly List<Target> _targets = new List<Target>();
 
         #region Config
+
         [AcceptableValueRange(-500, 0, false)]
         public static ConfigWrapper<int> Minimum { get; private set; }
+
         [AcceptableValueRange(100, 500, false)]
         public static ConfigWrapper<int> Maximum { get; private set; }
 
@@ -45,6 +48,7 @@ namespace EC.Core.SliderUnlocker
             Minimum = Config.Wrap("Slider Config", "Minimum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 0);
             Maximum = Config.Wrap("Slider Config", "Maximum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 100);
         }
+
         #endregion
 
         protected void Awake()
@@ -75,12 +79,15 @@ namespace EC.Core.SliderUnlocker
             }
         }
 
-        private static void LevelFinishedLoading(Scene scene, LoadSceneMode mode) => SetAllSliders(scene);
+        private static void LevelFinishedLoading(Scene scene, LoadSceneMode mode)
+        {
+            SetAllSliders(scene);
+        }
 
         /// <summary>
         /// Sliders that don't work or have issues outside of the 0-100 limit
         /// </summary>
-        private static readonly string[] SliderBlacklist = { "sldWaistLowW", "sldHairLength" };
+        private static readonly string[] SliderBlacklist = {"sldWaistLowW", "sldHairLength"};
 
         internal static IEnumerator ResetAllSliders()
         {
@@ -98,7 +105,7 @@ namespace EC.Core.SliderUnlocker
 
                     foreach (var x in target.Sliders)
                     {
-                        var slider = (Slider)x.GetValue(cvs);
+                        var slider = (Slider) x.GetValue(cvs);
                         if (slider != null)
                         {
                             slider.maxValue = SliderAbsoluteMax;
@@ -124,11 +131,9 @@ namespace EC.Core.SliderUnlocker
 
                     foreach (var x in target.Sliders)
                     {
-                        var slider = (Slider)x.GetValue(cvs);
+                        var slider = (Slider) x.GetValue(cvs);
                         if (slider != null)
-                        {
                             UnlockSlider(slider, slider.value, SliderBlacklist.Contains(x.Name));
-                        }
                     }
                 }
             }
@@ -152,7 +157,7 @@ namespace EC.Core.SliderUnlocker
                     var buttonClicked = false;
                     foreach (var x in target.Fields)
                     {
-                        var inputField = (TMP_InputField)x.GetValue(cvs);
+                        var inputField = (TMP_InputField) x.GetValue(cvs);
                         if (inputField == null)
                             continue;
 
@@ -163,7 +168,7 @@ namespace EC.Core.SliderUnlocker
                         if (sliderFieldInfo == null)
                             continue;
 
-                        var slider = (Slider)sliderFieldInfo.GetValue(cvs);
+                        var slider = (Slider) sliderFieldInfo.GetValue(cvs);
                         if (slider == null)
                             continue;
 
@@ -184,7 +189,7 @@ namespace EC.Core.SliderUnlocker
 
                     foreach (var x in target.Buttons)
                     {
-                        var button = (Button)x.GetValue(cvs);
+                        var button = (Button) x.GetValue(cvs);
                         if (button == null)
                             continue;
 
@@ -193,7 +198,7 @@ namespace EC.Core.SliderUnlocker
                         if (sliderFieldInfo == null)
                             continue;
 
-                        var slider = (Slider)sliderFieldInfo.GetValue(cvs);
+                        var slider = (Slider) sliderFieldInfo.GetValue(cvs);
                         if (slider == null)
                             continue;
 
@@ -208,7 +213,7 @@ namespace EC.Core.SliderUnlocker
         {
             foreach (var x in target.Sliders)
             {
-                var slider = (Slider)x.GetValue(cvs);
+                var slider = (Slider) x.GetValue(cvs);
                 if (slider != null)
                 {
                     if (SliderBlacklist.Contains(x.Name))
@@ -246,7 +251,7 @@ namespace EC.Core.SliderUnlocker
         /// </summary>
         private static void UnlockSlider(Slider _slider, float value, bool defaultRange)
         {
-            var valueRoundedUp = (int)Math.Ceiling(Math.Abs(value));
+            var valueRoundedUp = (int) Math.Ceiling(Math.Abs(value));
             var max = defaultRange ? 1 : SliderMax;
             var min = defaultRange ? 0 : SliderMin;
 
@@ -268,8 +273,17 @@ namespace EC.Core.SliderUnlocker
         }
 
         #region MonoBehaviour
-        protected void OnEnable() => SceneManager.sceneLoaded += LevelFinishedLoading;
-        protected void OnDisable() => SceneManager.sceneLoaded -= LevelFinishedLoading;
+
+        protected void OnEnable()
+        {
+            SceneManager.sceneLoaded += LevelFinishedLoading;
+        }
+
+        protected void OnDisable()
+        {
+            SceneManager.sceneLoaded -= LevelFinishedLoading;
+        }
+
         #endregion
 
         private sealed class Target
@@ -281,6 +295,7 @@ namespace EC.Core.SliderUnlocker
                 Sliders = sliders;
                 Buttons = buttons;
             }
+
             public readonly Type Type;
             public readonly List<FieldInfo> Fields;
             public readonly List<FieldInfo> Sliders;

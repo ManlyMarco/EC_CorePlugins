@@ -5,9 +5,9 @@ using EC.Core.Internal;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EC.Core.Fixes")]
+[assembly: AssemblyTitle("EC.Core.Fixes.CultureFix")]
 [assembly: AssemblyCompany(Metadata.CompanyName)]
-[assembly: AssemblyProduct("EC.Core.Fixes")]
+[assembly: AssemblyProduct("EC.Core.Fixes.CultureFix")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
