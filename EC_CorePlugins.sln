@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NullChecks", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fixes", "Fixes", "{14E7745A-BEBE-4C8E-8B36-93C2D5755186}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.MessagePopups", "EC.Core.MessagePopups\EC.Core.MessagePopups.csproj", "{3914AF1F-A0CE-4B61-B999-0C174B492790}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

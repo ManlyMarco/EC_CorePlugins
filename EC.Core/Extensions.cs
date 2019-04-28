@@ -17,20 +17,13 @@ namespace EC.Core
             if (self == null)
                 return default(T);
 
-            MemoryStream memoryStream = new MemoryStream();
-            T result;
-            try
+            using (var memoryStream = new MemoryStream())
             {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                var binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(memoryStream, self);
                 memoryStream.Position = 0L;
-                result = (T)binaryFormatter.Deserialize(memoryStream);
+                return (T)binaryFormatter.Deserialize(memoryStream);
             }
-            finally
-            {
-                memoryStream.Close();
-            }
-            return result;
         }
     }
 }
