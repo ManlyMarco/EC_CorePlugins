@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Win32;
 using UnityEngine;
 
 namespace EC.Core.Sideloader
@@ -31,11 +32,12 @@ namespace EC.Core.Sideloader
         protected static HashSet<string> PngFolderList = new HashSet<string>();
         protected static HashSet<string> PngFolderOnlyList = new HashSet<string>();
 
-        internal static new ManualLogSource Logger;
+        internal new static ManualLogSource Logger;
 
         public static ConfigWrapper<bool> MissingModWarning { get; private set; }
         public static ConfigWrapper<bool> DebugLogging { get; private set; }
         public static ConfigWrapper<bool> DebugResolveInfoLogging { get; private set; }
+        public static ConfigWrapper<string> AdditionalModsDirectory { get; private set; }
 
         public Sideloader()
         {
@@ -51,7 +53,6 @@ namespace EC.Core.Sideloader
                 return null;
             };
 
-            //install hooks
             Hooks.InstallHooks();
             UniversalAutoResolver.Hooks.InstallHooks();
             ResourceRedirector.ResourceRedirector.AssetResolvers.Add(RedirectHook);
@@ -60,17 +61,41 @@ namespace EC.Core.Sideloader
             DebugLogging = Config.Wrap("Debug", "Debug logging", "Enable additional logging useful for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase load and save times noticeably and will result in very large log sizes.", false);
             DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase game start up time and will result in very large log sizes.", false);
 
-            //check mods directory
+            AdditionalModsDirectory = Config.Wrap("", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
+            
             var modDirectory = Path.Combine(Paths.GameRootPath, "mods");
 
             if (!Directory.Exists(modDirectory))
-            {
-                Logger.Log(LogLevel.Warning, "[SIDELOADER] Could not find the \"mods\" directory");
-                return;
-            }
+                Logger.Log(LogLevel.Warning, "Could not find the mods directory: " + modDirectory);
 
-            LoadModsFromDirectory(modDirectory);
+            if (!string.IsNullOrWhiteSpace(AdditionalModsDirectory.Value) && !Directory.Exists(AdditionalModsDirectory.Value))
+                Logger.Log(LogLevel.Warning, "Could not find the additional mods directory specified in config: " + AdditionalModsDirectory.Value);
+
+            LoadModsFromDirectories(modDirectory, AdditionalModsDirectory.Value);
         }
+
+        private static string FindKoiZipmodDir()
+        {
+            try
+            {
+                using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Illusion\Koikatu\koikatu"))
+                {
+                    if (key?.GetValue("INSTALLDIR") is string dir)
+                    {
+                        dir = Path.Combine(dir, @"mods\Sideloader Modpack");
+                        if (Directory.Exists(dir))
+                            return dir;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Crash when trying to find Koikatsu mods directory");
+                Logger.LogError(e);
+            }
+            return string.Empty;
+        }
+
         /// <summary>
         /// Check if a mod with specified GUID has been loaded
         /// </summary>
@@ -80,19 +105,18 @@ namespace EC.Core.Sideloader
                 return false;
             return LoadedManifests.Any(x => x.GUID == guid);
         }
-        private void LoadModsFromDirectory(string modDirectory)
+
+        private void LoadModsFromDirectories(params string[] modDirectories)
         {
             string GetRelativeArchiveDir(string archiveDir)
             {
-                return archiveDir.Length < modDirectory.Length ? archiveDir : archiveDir.Substring(modDirectory.Length).Trim(' ', '/', '\\');
+                if (archiveDir.StartsWith(Paths.GameRootPath, StringComparison.OrdinalIgnoreCase))
+                    return archiveDir.Substring(Paths.GameRootPath.Length);
+                return archiveDir;
             }
 
-            Logger.Log(LogLevel.Info, "[SIDELOADER] Scanning the \"mods\" directory...");
-
             // Look for mods, load their manifests
-            var allMods = Directory.GetFiles(modDirectory, "*", SearchOption.AllDirectories)
-                .Where(x => x.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
-                            x.EndsWith(".zipmod", StringComparison.OrdinalIgnoreCase));
+            var allMods = modDirectories.Where(Directory.Exists).SelectMany(GetZipmodsFromDirectory);
 
             var archives = new Dictionary<ZipFile, Manifest>();
 
@@ -108,8 +132,8 @@ namespace EC.Core.Sideloader
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log(LogLevel.Error, $"[SIDELOADER] Failed to load archive \"{GetRelativeArchiveDir(archivePath)}\" with error: {ex.Message}");
-                    Logger.Log(LogLevel.Debug, $"[SIDELOADER] Error details: {ex}");
+                    Logger.Log(LogLevel.Error, $"Failed to load archive \"{GetRelativeArchiveDir(archivePath)}\" with error: {ex.Message}");
+                    Logger.Log(LogLevel.Debug, $"Error details: {ex}");
                     archive?.Close();
                 }
             }
@@ -128,8 +152,8 @@ namespace EC.Core.Sideloader
                 if (orderedMods.Count > 1)
                 {
                     var modList = string.Join(", ", orderedMods.Select(x => '"' + GetRelativeArchiveDir(x.Key.Name) + '"').ToArray());
-                    Logger.Log(LogLevel.Warning, $"[SIDELOADER] Archives with identical GUIDs detected! Archives: {modList}");
-                    Logger.Log(LogLevel.Warning, $"[SIDELOADER] Only \"{GetRelativeArchiveDir(orderedMods[0].Key.Name)}\" will be loaded because it's the newest");
+                    Logger.Log(LogLevel.Warning, $"Archives with identical GUIDs detected! Archives: {modList}");
+                    Logger.Log(LogLevel.Warning, $"Only \"{GetRelativeArchiveDir(orderedMods[0].Key.Name)}\" will be loaded because it's the newest");
 
                     // Don't keep the duplicate archives in memory
                     foreach (var dupeMod in orderedMods.Skip(1))
@@ -151,18 +175,26 @@ namespace EC.Core.Sideloader
                     var trimmedName = manifest.Name?.Trim();
                     var displayName = !string.IsNullOrEmpty(trimmedName) ? trimmedName : Path.GetFileName(archive.Name);
 
-                    Logger.Log(LogLevel.Info, $"[SIDELOADER] Loaded {displayName} {manifest.Version ?? ""}");
+                    Logger.Log(LogLevel.Info, $"Loaded {displayName} {manifest.Version ?? ""}");
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log(LogLevel.Error, $"[SIDELOADER] Failed to load archive \"{GetRelativeArchiveDir(archive.Name)}\" with error: {ex.Message}");
-                    Logger.Log(LogLevel.Debug, $"[SIDELOADER] Error details: {ex}");
+                    Logger.Log(LogLevel.Error, $"Failed to load archive \"{GetRelativeArchiveDir(archive.Name)}\" with error: {ex.Message}");
+                    Logger.Log(LogLevel.Debug, $"Error details: {ex}");
                 }
             }
 
             UniversalAutoResolver.UniversalAutoResolver.SetResolveInfos(_gatheredResolutionInfos);
 
             BuildPngOnlyFolderList();
+        }
+
+        private static IEnumerable<string> GetZipmodsFromDirectory(string modDirectory)
+        {
+            Logger.LogInfo("Loading mods from directory: " + modDirectory);
+            return Directory.GetFiles(modDirectory, "*", SearchOption.AllDirectories)
+                            .Where(x => x.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
+                                        x.EndsWith(".zipmod", StringComparison.OrdinalIgnoreCase));
         }
 
         protected void SetPossessNew(ChaListData data)
@@ -200,8 +232,8 @@ namespace EC.Core.Sideloader
                     }
                     catch (Exception ex)
                     {
-                        Logger.Log(LogLevel.Error, $"[SIDELOADER] Failed to load list file \"{entry.Name}\" from archive \"{arc.Name}\" with error: {ex.Message}");
-                        Logger.Log(LogLevel.Error, $"[SIDELOADER] Error details: {ex}");
+                        Logger.Log(LogLevel.Error, $"Failed to load list file \"{entry.Name}\" from archive \"{arc.Name}\" with error: {ex.Message}");
+                        Logger.Log(LogLevel.Error, $"Error details: {ex}");
                     }
                 }
             }
@@ -222,7 +254,7 @@ namespace EC.Core.Sideloader
 
                     //Make a list of all the .png files and archive they come from
                     if (PngList.ContainsKey(entry.Name))
-                        Logger.Log(LogLevel.Warning, $"[SIDELOADER] Duplicate asset detected! {assetBundlePath}");
+                        Logger.Log(LogLevel.Warning, $"Duplicate asset detected! {assetBundlePath}");
                     else
                         PngList.Add(entry.Name, arc);
 
@@ -291,13 +323,13 @@ namespace EC.Core.Sideloader
                             long index = (long)locateZipEntryMethodInfo.Invoke(arc, new object[] { entry });
 
                             if (DebugLogging.Value)
-                                Logger.Log(LogLevel.Debug, $"[SIDELOADER] Streaming {entry.Name} ({archiveFilename}) unity3d file from disk, offset {index}");
+                                Logger.Log(LogLevel.Debug, $"Streaming {entry.Name} ({archiveFilename}) unity3d file from disk, offset {index}");
 
                             bundle = AssetBundle.LoadFromFile(archiveFilename, 0, (ulong)index);
                         }
                         else
                         {
-                            Logger.Log(LogLevel.Debug, $"[SIDELOADER] Cannot stream {entry.Name} ({archiveFilename}) unity3d file from disk, loading to RAM instead");
+                            Logger.Log(LogLevel.Debug, $"Cannot stream {entry.Name} ({archiveFilename}) unity3d file from disk, loading to RAM instead");
                             var stream = arc.GetInputStream(entry);
 
                             byte[] buffer = new byte[entry.Size];
@@ -311,7 +343,7 @@ namespace EC.Core.Sideloader
 
                         if (bundle == null)
                         {
-                            Logger.Log(LogLevel.Error, $"[SIDELOADER] Asset bundle \"{entry.Name}\" ({Path.GetFileName(archiveFilename)}) failed to load. It might have a conflicting CAB string.");
+                            Logger.Log(LogLevel.Error, $"Asset bundle \"{entry.Name}\" ({Path.GetFileName(archiveFilename)}) failed to load. It might have a conflicting CAB string.");
                         }
 
                         return bundle;
@@ -320,7 +352,7 @@ namespace EC.Core.Sideloader
                     BundleManager.AddBundleLoader(getBundleFunc, assetBundlePath, out string warning);
 
                     if (!string.IsNullOrEmpty(warning))
-                        Logger.Log(LogLevel.Warning, $"[SIDELOADER] {warning}");
+                        Logger.Log(LogLevel.Warning, $"{warning}");
                 }
             }
         }
