@@ -19,7 +19,7 @@ namespace EC.Core.ExtensibleSaveFormat
             public static readonly string Marker = "KKEx";
             public static readonly int Version = 3;
 
-            private static bool cardReadEventCalled;
+            private static bool _cardReadEventCalled;
 
             public static void InstallHooks()
             {
@@ -34,7 +34,7 @@ namespace EC.Core.ExtensibleSaveFormat
             [HarmonyPatch(typeof(ChaFile), "LoadFile", typeof(BinaryReader), typeof(int), typeof(bool), typeof(bool))]
             public static void ChaFileLoadFilePreHook(ChaFile __instance, BinaryReader br, int lang, bool noLoadPNG, bool noLoadStatus)
             {
-                cardReadEventCalled = false;
+                _cardReadEventCalled = false;
             }
 
             public static void ChaFileLoadFileHook(ChaFile file, BlockHeader header, BinaryReader reader)
@@ -52,7 +52,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
                     reader.BaseStream.Position = originalPosition;
 
-                    cardReadEventCalled = true;
+                    _cardReadEventCalled = true;
 
                     try
                     {
@@ -106,46 +106,8 @@ namespace EC.Core.ExtensibleSaveFormat
                 if (!__result)
                     return;
 
-                //Compatibility for ver 1 and 2 ext save data
-                if (br.BaseStream.Position != br.BaseStream.Length)
-                {
-                    var originalPosition = br.BaseStream.Position;
-
-                    try
-                    {
-                        var marker = br.ReadString();
-                        var version = br.ReadInt32();
-
-                        if (marker == "KKEx" && version == 2)
-                        {
-                            var length = br.ReadInt32();
-
-                            if (length > 0)
-                            {
-                                var bytes = br.ReadBytes(length);
-                                var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
-
-                                cardReadEventCalled = true;
-                                internalCharaDictionary.Set(__instance, dictionary);
-
-                                cardReadEvent(__instance);
-                            }
-                        }
-                        else
-                            br.BaseStream.Position = originalPosition;
-                    }
-                    catch (EndOfStreamException)
-                    {
-                        /* Incomplete/non-existant data */
-                    }
-                    catch (SystemException)
-                    {
-                        /* Invalid/unexpected deserialized data */
-                    }
-                }
-
                 //If the event wasn't called at this point, it means the card doesn't contain any data, but we still need to call the even for consistency.
-                if (cardReadEventCalled == false)
+                if (_cardReadEventCalled == false)
                 {
                     internalCharaDictionary.Set(__instance, new Dictionary<string, PluginData>());
                     cardReadEvent(__instance);
