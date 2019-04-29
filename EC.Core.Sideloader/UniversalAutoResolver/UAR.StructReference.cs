@@ -52,7 +52,6 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
 
             var baseProperties = new List<CategoryProperty>
             {
-                //these might be very wrong, please advise
                 new CategoryProperty(CategoryNo.bo_head, "headId"),
                 new CategoryProperty(CategoryNo.mt_face_detail, "detailId"),
                 new CategoryProperty(CategoryNo.mt_eyebrow, "eyebrowId"),

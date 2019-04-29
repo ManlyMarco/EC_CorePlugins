@@ -18,21 +18,9 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
         [Key("CategoryNo")]
         public ChaListDefine.CategoryNo CategoryNo { get; set; }
 
-        public bool CanResolve(ResolveInfo other) => GUID == other.GUID
-                    && Property == other.Property
-                    && Slot == other.Slot;
-
-        public static ResolveInfo Unserialize(byte[] data) => MessagePackSerializer.Deserialize<ResolveInfo>(data);
+        public static ResolveInfo Deserialize(byte[] data) => MessagePackSerializer.Deserialize<ResolveInfo>(data);
 
         public byte[] Serialize() => MessagePackSerializer.Serialize(this);
 
-        //public ResolveInfo AppendPropertyPrefix(string prefix)
-        //{
-        //    var newResolveInfo = this.DeepCopy();
-
-        //    newResolveInfo.Property = $"{prefix}{newResolveInfo.Property}";
-
-        //    return newResolveInfo;
-        //}
     }
 }

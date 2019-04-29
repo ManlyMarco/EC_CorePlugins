@@ -15,6 +15,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
         {
             ExtendedSave.CardBeingLoaded += ExtendedCardLoad;
             ExtendedSave.CardBeingSaved += ExtendedCardSave;
+            ExtendedSave.CardBeingImported += ExtendedCardImport;
 
             ExtendedSave.CoordinateBeingLoaded += ExtendedCoordinateLoad;
             ExtendedSave.CoordinateBeingSaved += ExtendedCoordinateSave;
@@ -43,6 +44,68 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
             }
         }
 
+        private static void ExtendedCardImport(Dictionary<string, PluginData> importedExtendedData)
+        {
+            Sideloader.Logger.Log(LogLevel.Debug, $"Importing card");
+            if (importedExtendedData.TryGetValue("com.bepis.sideloader.universalautoresolver", out var pluginData))
+            {
+                Sideloader.Logger.Log(LogLevel.Info, pluginData);
+                if (pluginData == null || !pluginData.data.ContainsKey("info"))
+                    Sideloader.Logger.Log(LogLevel.Debug, "No sideloader marker found");
+                else
+                {
+                    var tmpExtInfo = (object[])pluginData.data["info"];
+                    var extInfo = tmpExtInfo.Select(x => ResolveInfo.Deserialize((byte[])x)).ToList();
+                    Sideloader.Logger.Log(LogLevel.Debug, $"Sideloader marker found, external info count: {extInfo.Count}");
+
+                    for (int i = 0; i < extInfo.Count;)
+                    {
+                        Sideloader.Logger.Log(LogLevel.Debug, $"External info: {extInfo[i].GUID} : {extInfo[i].Property} : {extInfo[i].Slot}");
+                        if (extInfo[i].Property.StartsWith("outfit0"))
+                        {
+                            extInfo[i].Property = extInfo[i].Property.Replace("outfit0", "outfit");
+                            i++;
+                        }
+                        else if (extInfo[i].Property.StartsWith("outfit"))
+                        {
+                            extInfo.RemoveAt(i);
+                        }
+                        else
+                            i++;
+                    }
+
+                    importedExtendedData[UniversalAutoResolver.UARExtID] = new PluginData
+                    {
+                        data = new Dictionary<string, object>
+                        {
+                            ["info"] = extInfo.Select(x => x.Serialize()).ToList()
+                        }
+                    };
+                }
+            }
+
+            if (importedExtendedData.TryGetValue(UniversalAutoResolver.UARExtID, out var extData))
+            {
+                if (extData == null || !extData.data.ContainsKey("info"))
+                {
+                    Sideloader.Logger.Log(LogLevel.Debug, "No sideloader marker found");
+                }
+                else
+                {
+                    var tmpExtInfo = (List<byte[]>)extData.data["info"];
+                    var extInfo = tmpExtInfo.Select(ResolveInfo.Deserialize).ToList();
+
+                    Sideloader.Logger.Log(LogLevel.Debug, $"Sideloader marker found, external info count: {extInfo.Count}");
+
+                    if (Sideloader.DebugLogging.Value)
+                    {
+                        foreach (ResolveInfo info in extInfo)
+                            Sideloader.Logger.Log(LogLevel.Debug, $"External info: {info.GUID} : {info.Property} : {info.Slot}");
+                    }
+                }
+            }
+        }
+
         private static void ExtendedCardLoad(ChaFile file)
         {
             Sideloader.Logger.Log(LogLevel.Debug, $"Loading card [{file.charaFileName}]");
@@ -58,7 +121,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
             else
             {
                 var tmpExtInfo = (object[])extData.data["info"];
-                extInfo = tmpExtInfo.Select(x => ResolveInfo.Unserialize((byte[])x)).ToList();
+                extInfo = tmpExtInfo.Select(x => ResolveInfo.Deserialize((byte[])x)).ToList();
 
                 Sideloader.Logger.Log(LogLevel.Debug, $"Sideloader marker found, external info count: {extInfo.Count}");
 
@@ -137,7 +200,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
             var extData = ExtendedSave.GetExtendedDataById(__instance, UniversalAutoResolver.UARExtID);
 
             var tmpExtInfo = (List<byte[]>)extData.data["info"];
-            var extInfo = tmpExtInfo.Select(ResolveInfo.Unserialize).ToList();
+            var extInfo = tmpExtInfo.Select(ResolveInfo.Deserialize).ToList();
 
             Sideloader.Logger.Log(LogLevel.Debug, $"External info count: {extInfo.Count}");
 
@@ -192,7 +255,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
             else
             {
                 var tmpExtInfo = (object[])extData.data["info"];
-                extInfo = tmpExtInfo.Select(x => ResolveInfo.Unserialize((byte[])x)).ToList();
+                extInfo = tmpExtInfo.Select(x => ResolveInfo.Deserialize((byte[])x)).ToList();
 
                 Sideloader.Logger.Log(LogLevel.Debug, $"Sideloader marker found, external info count: {extInfo.Count}");
 
@@ -270,7 +333,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
             var extData = ExtendedSave.GetExtendedDataById(__instance, UniversalAutoResolver.UARExtID);
 
             var tmpExtInfo = (List<byte[]>)extData.data["info"];
-            var extInfo = tmpExtInfo.Select(ResolveInfo.Unserialize).ToList();
+            var extInfo = tmpExtInfo.Select(ResolveInfo.Deserialize).ToList();
 
             Sideloader.Logger.Log(LogLevel.Debug, $"External info count: {extInfo.Count}");
 
