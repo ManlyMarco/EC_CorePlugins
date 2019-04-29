@@ -34,7 +34,8 @@ namespace KKAPI
         /// <summary>
         /// GUID of this plugin, use for checking dependancies with <see cref="BepInDependency"/> and <see cref="CheckRequiredPlugin"/>
         /// </summary>
-        public const string GUID = "EC.API";
+        // Avoid changing anything that could break the interface with original KKAPI
+        public const string GUID = "marco.kkapi";
 
         /// <summary>
         /// Enables display of additional log messages when certain events are triggered within KKAPI. 

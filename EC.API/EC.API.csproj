@@ -7,7 +7,7 @@
     <ProjectGuid>{74C2DB86-55BB-47B4-9805-51B5B992EF35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EC.API</RootNamespace>
+    <RootNamespace>KKAPI</RootNamespace>
     <AssemblyName>EC.API</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
