@@ -336,3 +336,4 @@ lib/UnityEngine*
 lib/BepInEx.dll
 lib/BepInEx.Harmony.dll
 lib/IL.dll
+*.DotSettings
