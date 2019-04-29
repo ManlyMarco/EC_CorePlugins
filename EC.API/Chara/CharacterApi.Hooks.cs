@@ -3,7 +3,6 @@ using ChaCustom;
 using Harmony;
 using KKAPI.Maker;
 using System;
-using UnityEngine;
 using Logger = KKAPI.KoikatuAPI;
 
 namespace KKAPI.Chara
@@ -13,17 +12,8 @@ namespace KKAPI.Chara
         private static class Hooks
         {
             [HarmonyPostfix]
-            [HarmonyPatch(typeof(ChaControl), nameof(ChaControl.Initialize), new[]
-            {
-                typeof(byte),
-                typeof(bool),
-                typeof(GameObject),
-                typeof(int),
-                typeof(int),
-                typeof(ChaFileControl)
-            })]
-            public static void ChaControl_InitializePostHook(byte _sex, bool _hiPoly, GameObject _objRoot, int _id, int _no,
-                ChaFileControl _chaFile, ChaControl __instance)
+            [HarmonyPatch(typeof(ChaControl), nameof(ChaControl.Initialize), typeof(byte), typeof(int), typeof(UnityEngine.GameObject), typeof(int), typeof(int), typeof(ChaFileControl))]
+            public static void ChaControl_InitializePostHook(ChaControl __instance)
             {
                 Logger.Log(LogLevel.Debug, $"[KKAPI] Character card load: {GetLogName(__instance)} {(MakerAPI.CharaListIsLoading ? "inside CharaList" : string.Empty)}");
 
@@ -39,7 +29,7 @@ namespace KKAPI.Chara
             {
                 ChaControls.Remove(__instance);
             }
-            
+
             /// <summary>
             /// Needed for saving in class maker, rest is handled by ExtendedSave.CardBeingSaved
             /// </summary>
@@ -67,7 +57,7 @@ namespace KKAPI.Chara
             {
                 foreach (var handler in _registeredHandlers)
                 {
-                    if(handler.ExtendedDataCopier == null)
+                    if (handler.ExtendedDataCopier == null)
                         continue;
 
                     try

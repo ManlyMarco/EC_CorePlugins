@@ -86,10 +86,10 @@ namespace KKAPI.Maker
             {
                 CharaListIsLoading = false;
             }
-            
+
             [HarmonyPrefix]
-            [HarmonyPatch(typeof(ChaFile), "LoadFile", new[] { typeof(BinaryReader), typeof(bool), typeof(bool) })]
-            public static void ChaFileLoadFilePreHook(ChaFile __instance, BinaryReader br, bool noLoadPNG, bool noLoadStatus)
+            [HarmonyPatch(typeof(ChaFile), "LoadFile", new[] { typeof(BinaryReader), typeof(int), typeof(bool), typeof(bool) })]
+            public static void ChaFileLoadFilePreHook(ChaFile __instance, BinaryReader br, int lang, bool noLoadPNG, bool noLoadStatus)
             {
                 if (!CharaListIsLoading && InsideMaker)
                     InternalLastLoadedChaFile = __instance;
