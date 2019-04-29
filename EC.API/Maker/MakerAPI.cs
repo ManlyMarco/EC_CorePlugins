@@ -100,9 +100,15 @@ namespace KKAPI.Maker
             {
                 // Remove the red info text at the bottom to free up some space
                 var contentParent = FindSubcategoryContentParent(slotTransform);
-                var text = contentParent.Find("txtExplanation");
-                text.GetComponent<LayoutElement>().enabled = false;
-                text.Cast<Transform>().First().gameObject.SetActive(false);
+                foreach (var txtName in new[] { "txtExplanation", "txtAcsExplanation" })
+                {
+                    var text = contentParent.Find(txtName);
+                    if (text != null)
+                    {
+                        text.GetComponent<LayoutElement>().enabled = false;
+                        text.Cast<Transform>().First().gameObject.SetActive(false);
+                    }
+                }
 
                 CreateCustomControlsInSubCategory(slotTransform, _accessoryWindowEntries);
             }
@@ -138,7 +144,7 @@ namespace KKAPI.Maker
             MakerCoordinateLoadToggle.Reset();
         }
 
-        private static Transform FindSubcategoryContentParent(Transform categorySubTransform)
+        public static Transform FindSubcategoryContentParent(Transform categorySubTransform)
         {
             var top = categorySubTransform.Cast<Transform>().First(x => x.name != "imgOff");
             return top.Find("Scroll View/Viewport/Content") ?? top;
