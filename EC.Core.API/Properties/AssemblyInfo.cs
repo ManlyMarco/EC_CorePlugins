@@ -6,11 +6,11 @@ using KKAPI;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EC.API")]
+[assembly: AssemblyTitle("EC.Core.API")]
 [assembly: AssemblyDescription("Modding API for EmotionCreators!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany(Metadata.CompanyName)]
-[assembly: AssemblyProduct("EC.API")]
+[assembly: AssemblyProduct("EC.Core.API")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
