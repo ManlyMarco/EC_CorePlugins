@@ -1,4 +1,6 @@
-﻿using BepInEx;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using BepInEx;
 using BepInEx.Harmony;
 using EC.Core.Internal;
 using Harmony;
@@ -48,6 +50,30 @@ namespace EC.Core.Fixes.NullChecks
                         return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Fix null exception when importing characters with modded clothes under some conditions
+        /// </summary>
+        [HarmonyTranspiler, HarmonyPatch(typeof(ChaFileControl), nameof(ChaFileControl.CheckUsedPackageCoordinate))]
+        public static IEnumerable<CodeInstruction> ImportNullFixTpl(IEnumerable<CodeInstruction> instructions)
+        {
+            var target = AccessTools.Property(typeof(ListInfoBase), nameof(ListInfoBase.Kind)).GetMethod;
+            var replacement = AccessTools.Method(typeof(NullChecks), nameof(SafeGetKind));
+
+            foreach (var instruction in instructions)
+            {
+                if (Equals(instruction.operand, target))
+                    yield return new CodeInstruction(OpCodes.Call, replacement);
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static int SafeGetKind(ListInfoBase instance)
+        {
+            if (instance == null) return -9999;
+            return instance.Kind;
         }
     }
 }
