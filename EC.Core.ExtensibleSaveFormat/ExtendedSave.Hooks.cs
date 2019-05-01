@@ -27,7 +27,7 @@ namespace EC.Core.ExtensibleSaveFormat
             #region ChaFile
 
             #region Loading
-            
+
             public static void ChaFileLoadFileHook(ChaFile file, BlockHeader header, BinaryReader reader)
             {
                 var info = header.SearchInfo(Marker);
@@ -106,7 +106,7 @@ namespace EC.Core.ExtensibleSaveFormat
                     _internalCharaDictionary.Set(cfc, result);
                 }
             }
-            
+
             public static void KKChaFileLoadFileHook(KoikatsuCharaFile.ChaFile file, BlockHeader header, BinaryReader reader)
             {
                 var info = header.SearchInfo(Marker);
@@ -121,7 +121,7 @@ namespace EC.Core.ExtensibleSaveFormat
                     var data = reader.ReadBytes((int)info.size);
 
                     reader.BaseStream.Position = originalPosition;
-                    
+
                     try
                     {
                         var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(data);
@@ -359,7 +359,7 @@ namespace EC.Core.ExtensibleSaveFormat
             }
 
             #endregion
-            
+
             #region ImportKK
 
             [HarmonyPostfix]
@@ -379,21 +379,25 @@ namespace EC.Core.ExtensibleSaveFormat
             [HarmonyPatch(typeof(KoikatsuCharaFile.ChaFileCoordinate), nameof(KoikatsuCharaFile.ChaFileCoordinate.LoadFile), typeof(Stream), typeof(bool))]
             public static IEnumerable<CodeInstruction> KKChaFileCoordinateLoadTranspiler(IEnumerable<CodeInstruction> instructions)
             {
-                var set = false;
-                var instructionsList = instructions.ToList();
-                for (var i = 0; i < instructionsList.Count; i++)
-                {
-                    var inst = instructionsList[i];
-                    if (set == false && inst.opcode == OpCodes.Ldc_I4_1 && instructionsList[i + 1].opcode == OpCodes.Stloc_1 && instructionsList[i + 2].opcode == OpCodes.Leave)
-                    {
-                        yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        yield return new CodeInstruction(OpCodes.Ldloc_0);
-                        yield return new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(KKChaFileCoordinateLoadHook)));
-                        set = true;
-                    }
+                var instructionList = instructions.ToList();
 
-                    yield return inst;
+                var usingFinishIndex = instructionList.FindIndex(instruction => instruction.opcode == OpCodes.Leave);
+                while (usingFinishIndex > 0)
+                {
+                    instructionList.InsertRange(usingFinishIndex, new[]
+                    {
+                        // Load instance of ChaFileCoordinate
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        // Load BinaryReader local var
+                        new CodeInstruction(OpCodes.Ldloc_0),
+                        new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(KKChaFileCoordinateLoadHook)))
+
+                    });
+
+                    usingFinishIndex = instructionList.FindIndex(usingFinishIndex + 4, instruction => instruction.opcode == OpCodes.Leave);
                 }
+
+                return instructionList;
             }
 
             public static void KKChaFileCoordinateLoadHook(KoikatsuCharaFile.ChaFileCoordinate coordinate, BinaryReader br)
