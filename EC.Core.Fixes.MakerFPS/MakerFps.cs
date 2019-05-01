@@ -18,7 +18,11 @@ namespace EC.Core.Fixes.MakerFPS
         public const string PluginName = "Maker FPS optimization";
         public const string Version = Metadata.PluginsVersion;
 
-        private void Start() => HarmonyWrapper.PatchAll(typeof(MakerFps));
+        private void Start()
+        {
+            if (Config.Wrap("", "Improve maker FPS", "Improves FPS in character maker at the cost of slower switching between tabs", SystemInfo.processorFrequency < 2700).Value)
+                HarmonyWrapper.PatchAll(typeof(MakerFps));
+        }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CustomScene), "Start")]
         public static void MakerStartHook(CustomScene __instance)
