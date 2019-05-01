@@ -308,25 +308,30 @@ namespace EC.Core.ExtensibleSaveFormat
             [HarmonyPatch(typeof(ChaFileCoordinate), nameof(ChaFileCoordinate.LoadFile), typeof(Stream), typeof(int))]
             public static IEnumerable<CodeInstruction> ChaFileCoordinateLoadTranspiler(IEnumerable<CodeInstruction> instructions)
             {
-                var set = false;
-                var instructionsList = instructions.ToList();
-                for (var i = 0; i < instructionsList.Count; i++)
-                {
-                    var inst = instructionsList[i];
-                    if (set == false && inst.opcode == OpCodes.Ldc_I4_1 && instructionsList[i + 1].opcode == OpCodes.Stloc_1 && instructionsList[i + 2].opcode == OpCodes.Leave)
-                    {
-                        yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        yield return new CodeInstruction(OpCodes.Ldloc_0);
-                        yield return new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(ChaFileCoordinateLoadHook)));
-                        set = true;
-                    }
+                var instructionList = instructions.ToList();
 
-                    yield return inst;
+                var usingFinishIndex = instructionList.FindIndex(instruction => instruction.opcode == OpCodes.Leave);
+                while (usingFinishIndex > 0)
+                {
+                    instructionList.InsertRange(usingFinishIndex, new[]
+                    {
+                        // Load instance of ChaFileCoordinate
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        // Load BinaryReader local var
+                        new CodeInstruction(OpCodes.Ldloc_0),
+                        new CodeInstruction(OpCodes.Call, typeof(Hooks).GetMethod(nameof(ChaFileCoordinateLoadHook)))
+
+                    });
+
+                    usingFinishIndex = instructionList.FindIndex(usingFinishIndex + 4, instruction => instruction.opcode == OpCodes.Leave);
                 }
+
+                return instructionList;
             }
 
             public static void ChaFileCoordinateLoadHook(ChaFileCoordinate coordinate, BinaryReader br)
             {
+                var pos = br.BaseStream.Position;
                 try
                 {
                     var marker = br.ReadString();
@@ -348,11 +353,13 @@ namespace EC.Core.ExtensibleSaveFormat
                 {
                     /* Incomplete/non-existant data */
                     _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    br.BaseStream.Position = pos;
                 }
                 catch (InvalidOperationException)
                 {
                     /* Invalid/unexpected deserialized data */
                     _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    br.BaseStream.Position = pos;
                 }
 
                 CoordinateReadEvent(coordinate);
