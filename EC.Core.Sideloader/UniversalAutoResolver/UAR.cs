@@ -80,8 +80,8 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                         if (intResolve != null)
                         {
                             //found a match to a corrosponding internal mod
-                            //if (Sideloader.DebugLogging.Value)
-                            Sideloader.Logger.Log(LogLevel.Debug, $"[UAR] Resolving {extResolve.GUID}:{extResolve.Property} from slot {extResolve.Slot} to slot {intResolve.LocalSlot}");
+                            if (Sideloader.DebugLogging.Value)
+                                Sideloader.Logger.Log(LogLevel.Debug, $"[UAR] Resolving {extResolve.GUID}:{extResolve.Property} from slot {extResolve.Slot} to slot {intResolve.LocalSlot}");
                             kv.Value.SetMethod(structure, intResolve.LocalSlot);
                         }
                         else
@@ -90,7 +90,7 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                             {
                                 string mainAB = ListLoader.InternalDataList[kv.Key.Category][kv.Value.GetMethod(structure)].dictInfo[(int)ChaListDefine.KeyType.MainAB];
                                 mainAB = mainAB.Replace("chara/", "").Replace(".unity3d", "").Replace(kv.Key.Category.ToString() + "_", "").Replace("/", "");
-                                Sideloader.Logger.Log(LogLevel.Info, mainAB);
+
                                 if (int.TryParse(mainAB, out int x))
                                 {
                                     //ID found but it conflicts with a vanilla item. Change the ID to avoid conflicts.
