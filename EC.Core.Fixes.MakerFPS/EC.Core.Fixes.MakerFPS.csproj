@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}</ProjectGuid>
+    <ProjectGuid>{344BF425-AE9F-4C6A-BC47-2FBF7836622A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EC.Core.Fixes.Import</RootNamespace>
-    <AssemblyName>EC.Core.Fixes.Import</AssemblyName>
+    <RootNamespace>EC.Core.Fixes.MakerFPS</RootNamespace>
+    <AssemblyName>EC.Core.Fixes.MakerFPS</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -64,7 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImportFix.cs" />
+    <Compile Include="MakerFps.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
