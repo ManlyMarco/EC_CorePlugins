@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fixes", "Fixes", "{14E7745A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.MessagePopups", "EC.Core.MessagePopups\EC.Core.MessagePopups.csproj", "{3914AF1F-A0CE-4B61-B999-0C174B492790}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.Import", "EC.Core.Fixes.Import\EC.Core.Fixes.Import.csproj", "{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3914AF1F-A0CE-4B61-B999-0C174B492790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F64FB505-1DAD-4FFB-9F48-09BB687C74DC} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
+		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49365589-3B47-409B-89E7-458D3A4FFEB6}
