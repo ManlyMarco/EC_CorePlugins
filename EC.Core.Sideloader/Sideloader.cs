@@ -24,6 +24,8 @@ namespace EC.Core.Sideloader
         public const string PluginName = "Sideloader";
         public const string Version = Metadata.PluginsVersion;
 
+        private const string GameName = "emotioncreators";
+
         protected List<ZipFile> Archives = new List<ZipFile>();
 
         public static readonly List<Manifest> LoadedManifests = new List<Manifest>();
@@ -62,7 +64,7 @@ namespace EC.Core.Sideloader
             DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase game start up time and will result in very large log sizes.", false);
 
             AdditionalModsDirectory = Config.Wrap("", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
-            
+
             var modDirectory = Path.Combine(Paths.GameRootPath, "mods");
 
             if (!Directory.Exists(modDirectory))
@@ -127,7 +129,7 @@ namespace EC.Core.Sideloader
                 {
                     archive = new ZipFile(archivePath);
 
-                    if (Manifest.TryLoadFromZip(archive, out Manifest manifest))
+                    if (Manifest.TryLoadFromZip(archive, out Manifest manifest) && (manifest.Game.IsNullOrWhiteSpace() || manifest.Game.ToLower() == GameName))
                         archives.Add(archive, manifest);
                 }
                 catch (Exception ex)
