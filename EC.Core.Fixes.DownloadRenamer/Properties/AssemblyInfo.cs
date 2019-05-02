@@ -5,9 +5,9 @@ using EC.Core.Internal;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EC.Core.DownloadRenamer")]
+[assembly: AssemblyTitle("EC.Core.Fixes.DownloadRenamer")]
 [assembly: AssemblyCompany(Metadata.CompanyName)]
-[assembly: AssemblyProduct("EC.Core.DownloadRenamer")]
+[assembly: AssemblyProduct("EC.Core.Fixes.DownloadRenamer")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
