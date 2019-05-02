@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.Import", "EC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.MakerFPS", "EC.Core.Fixes.MakerFPS\EC.Core.Fixes.MakerFPS.csproj", "{344BF425-AE9F-4C6A-BC47-2FBF7836622A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.DownloadRenamer", "EC.Core.DownloadRenamer\EC.Core.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{344BF425-AE9F-4C6A-BC47-2FBF7836622A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{344BF425-AE9F-4C6A-BC47-2FBF7836622A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{344BF425-AE9F-4C6A-BC47-2FBF7836622A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
