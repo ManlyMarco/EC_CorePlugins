@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Screencap", "EC.Core.Screencap\EC.Core.Screencap.csproj", "{4C3D3B27-00F5-42D3-85D7-82DE04479848}"
 EndProject
@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.Import", "EC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.MakerFPS", "EC.Core.Fixes.MakerFPS\EC.Core.Fixes.MakerFPS.csproj", "{344BF425-AE9F-4C6A-BC47-2FBF7836622A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.DownloadRenamer", "EC.Core.DownloadRenamer\EC.Core.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.DownloadRenamer", "EC.Core.Fixes.DownloadRenamer\EC.Core.Fixes.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +92,7 @@ Global
 		{D17E05B2-1003-4C09-B3FA-F091C30AC3E2} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 		{344BF425-AE9F-4C6A-BC47-2FBF7836622A} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
+		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49365589-3B47-409B-89E7-458D3A4FFEB6}
