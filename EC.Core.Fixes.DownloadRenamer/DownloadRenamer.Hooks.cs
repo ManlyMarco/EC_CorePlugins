@@ -11,6 +11,8 @@ namespace EC.Core.DownloadRenamer
         [HarmonyPrefix, HarmonyPatch(typeof(NetUIControl), "SaveDownloadFile")]
         public static bool SaveDownloadFilePrefix(byte[] bytes, NetworkInfo.BaseIndex info, NetUIControl __instance)
         {
+            if (!DownloadRenamer.EnambleRenaming.Value) return true;
+
             string prefix;
             string dir;
             // These names match the web downloader, which are more sensible.
