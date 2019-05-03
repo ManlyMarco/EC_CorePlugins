@@ -17,13 +17,30 @@ namespace EC.Core.Screencap
                 HarmonyWrapper.PatchAll(typeof(Hooks));
             }
 
+            #region Cancel vanilla screenshot
+
             [HarmonyPrefix]
             [HarmonyPatch(typeof(GameScreenShot), "Capture")]
             public static bool CapturePreHook()
             {
-                //cancel the vanilla screenshot
                 return false;
             }
+
+            [HarmonyPrefix]
+            [HarmonyPatch(typeof(GameScreenShot), "CreateCaptureFileName")]
+            public static bool CreateCaptureFileNamePreHook()
+            {
+                return false;
+            }
+
+            [HarmonyPrefix]
+            [HarmonyPatch(typeof(GameScreenShot), "UnityCapture")]
+            public static bool UnityCapturePreHook()
+            {
+                return false;
+            }
+
+            #endregion
 
             [HarmonyPrefix]
             [HarmonyPatch(typeof(CustomCapture), "CreatePng")]
