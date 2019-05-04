@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F64FB505-1DAD-4FFB-9F48-09BB687C74DC}</ProjectGuid>
+    <ProjectGuid>{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EC.Core.Fixes.CultureFix</RootNamespace>
-    <AssemblyName>EC.Core.Fixes.CultureFix</AssemblyName>
+    <RootNamespace>EC.Core.Fixes.NullChecks</RootNamespace>
+    <AssemblyName>EC.Core.Fixes.NullChecks</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\BepInEx\plugins\EC_CorePlugins\Fixes\</OutputPath>
+    <OutputPath>..\..\bin\BepInEx\plugins\EC_CorePlugins\Fixes\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,35 +25,47 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\BepInEx\plugins\EC_CorePlugins\Fixes\</OutputPath>
+    <OutputPath>..\..\bin\BepInEx\plugins\EC_CorePlugins\Fixes\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\lib\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\lib\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\lib\BepInEx.dll</HintPath>
+      <HintPath>..\..\lib\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>..\..\lib\BepInEx.Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="UnityEngine">
-      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <HintPath>..\..\lib\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\lib\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\lib\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CultureFix.cs" />
+    <Compile Include="NullChecks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EC.Core\EC.Core.csproj">
-      <Project>{41A43E0E-4758-4986-B5D9-9FEDF3A32F65}</Project>
+    <ProjectReference Include="..\..\EC.Core\EC.Core.csproj">
+      <Project>{41a43e0e-4758-4986-b5d9-9fedf3a32f65}</Project>
       <Name>EC.Core</Name>
       <Private>False</Private>
     </ProjectReference>

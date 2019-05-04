@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Screencap", "EC.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core", "EC.Core\EC.Core.csproj", "{41A43E0E-4758-4986-B5D9-9FEDF3A32F65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.CultureFix", "EC.Core.Fixes.CultureFix\EC.Core.Fixes.CultureFix.csproj", "{F64FB505-1DAD-4FFB-9F48-09BB687C74DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.CultureFix", "Fixes\EC.Core.Fixes.CultureFix\EC.Core.Fixes.CultureFix.csproj", "{F64FB505-1DAD-4FFB-9F48-09BB687C74DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.SliderUnlocker", "EC.Core.SliderUnlocker\EC.Core.SliderUnlocker.csproj", "{177A65D8-4A40-447E-87EA-551C04BCD110}"
 EndProject
@@ -17,21 +17,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Sideloader", "EC.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.ExtensibleSaveFormat", "EC.Core.ExtensibleSaveFormat\EC.Core.ExtensibleSaveFormat.csproj", "{9E2934EA-9BE2-40D7-AFDD-D6B96FF4317C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NullChecks", "EC.Core.Fixes.NullChecks\EC.Core.Fixes.NullChecks.csproj", "{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NullChecks", "Fixes\EC.Core.Fixes.NullChecks\EC.Core.Fixes.NullChecks.csproj", "{D17E05B2-1003-4C09-B3FA-F091C30AC3E2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fixes", "Fixes", "{14E7745A-BEBE-4C8E-8B36-93C2D5755186}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.MessagePopups", "EC.Core.MessagePopups\EC.Core.MessagePopups.csproj", "{3914AF1F-A0CE-4B61-B999-0C174B492790}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.Import", "EC.Core.Fixes.Import\EC.Core.Fixes.Import.csproj", "{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.Import", "Fixes\EC.Core.Fixes.Import\EC.Core.Fixes.Import.csproj", "{6B81ABF4-1612-42B5-B8A1-01F10EDB7617}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.MakerFPS", "EC.Core.Fixes.MakerFPS\EC.Core.Fixes.MakerFPS.csproj", "{344BF425-AE9F-4C6A-BC47-2FBF7836622A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.MakerFPS", "Fixes\EC.Core.Fixes.MakerFPS\EC.Core.Fixes.MakerFPS.csproj", "{344BF425-AE9F-4C6A-BC47-2FBF7836622A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.DownloadRenamer", "EC.Core.Fixes.DownloadRenamer\EC.Core.Fixes.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.DownloadRenamer", "Fixes\EC.Core.Fixes.DownloadRenamer\EC.Core.Fixes.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.ShaderDropdown", "EC.Core.Fixes.ShaderDropdown\EC.Core.Fixes.ShaderDropdown.csproj", "{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.ShaderDropdown", "Fixes\EC.Core.Fixes.ShaderDropdown\EC.Core.Fixes.ShaderDropdown.csproj", "{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NodeUnlock", "NodeUnlock\EC.Core.Fixes.NodeUnlock.csproj", "{77AFFDCA-FBD3-4053-9056-25D51F276693}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.NodeUnlock", "Fixes\EC.Core.Fixes.NodeUnlock\EC.Core.Fixes.NodeUnlock.csproj", "{77AFFDCA-FBD3-4053-9056-25D51F276693}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
