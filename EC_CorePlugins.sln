@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Screencap", "EC.Core.Screencap\EC.Core.Screencap.csproj", "{4C3D3B27-00F5-42D3-85D7-82DE04479848}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.MakerFPS", "EC.Core.Fixes.MakerFPS\EC.Core.Fixes.MakerFPS.csproj", "{344BF425-AE9F-4C6A-BC47-2FBF7836622A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.DownloadRenamer", "EC.Core.Fixes.DownloadRenamer\EC.Core.Fixes.DownloadRenamer.csproj", "{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EC.Core.Fixes.ShaderDropdown", "EC.Core.Fixes.ShaderDropdown\EC.Core.Fixes.ShaderDropdown.csproj", "{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +85,10 @@ Global
 		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +99,7 @@ Global
 		{6B81ABF4-1612-42B5-B8A1-01F10EDB7617} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 		{344BF425-AE9F-4C6A-BC47-2FBF7836622A} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 		{2F1827A3-7E2F-4A1D-8C46-24CF81F2D8D7} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
+		{2256CCD9-5DED-4D6C-A3EA-E8F9AA51B3B5} = {14E7745A-BEBE-4C8E-8B36-93C2D5755186}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49365589-3B47-409B-89E7-458D3A4FFEB6}

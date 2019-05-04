@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Harmony;
 using EC.Core.Internal;
 using Harmony;
