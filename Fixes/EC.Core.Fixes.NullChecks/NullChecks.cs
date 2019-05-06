@@ -12,7 +12,15 @@ namespace EC.Core.Fixes.NullChecks
         public const string PluginName = "Null Checks";
         public const string Version = Metadata.PluginsVersion;
 
-        private void Start() => HarmonyWrapper.PatchAll(typeof(NullChecks));
+        private void Start()
+        {
+            if (!Utilities.FixesConfig.Wrap(Utilities.ConfigSectionFixes, "Add more Null checks",
+                "Prevents some badly made mods from crashing the game with NullReferenceExceptions.", true).Value)
+                return;
+
+            HarmonyWrapper.PatchAll(typeof(NullChecks));
+        }
+
         /// <summary>
         /// Prevents null ChaCustomHairComponent rendAccessory objects from causing errors
         /// Ported from https://github.com/DeathWeasel1337/KK_Plugins KK_CutsceneLockupFix

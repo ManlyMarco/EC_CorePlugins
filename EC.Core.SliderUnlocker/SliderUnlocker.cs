@@ -54,7 +54,7 @@ namespace EC.Core.SliderUnlocker
         protected void Awake()
         {
             Hooks.InstallHooks();
-            //VoicePitch.Init();
+            //TODO VoicePitch.Init();
 
             foreach (var type in typeof(CvsAccessory).Assembly.GetTypes())
             {

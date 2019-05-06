@@ -18,7 +18,8 @@ namespace EC.Core.Fixes.DownloadRenamer
         private void Start()
         {
             BepInEx.Harmony.HarmonyWrapper.PatchAll(typeof(DownloadRenamer));
-            EnambleRenaming = Config.Wrap("Config", "Enamble Renaming", "When enabled, maps, scenes, poses, and characters downloaded in game will have their file names changed to match the ones on the Illusion website.", true);
+            EnambleRenaming = Utilities.FixesConfig.Wrap(Utilities.ConfigSectionTweaks, "Rename downloads", 
+                "When enabled, maps, scenes, poses, and characters downloaded in game will have their file names changed to match the ones on the Illusion website.", true);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(NetUIControl), "SaveDownloadFile")]

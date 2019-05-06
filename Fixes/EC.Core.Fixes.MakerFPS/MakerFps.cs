@@ -20,8 +20,11 @@ namespace EC.Core.Fixes.MakerFPS
 
         private void Start()
         {
-            if (Config.Wrap("", "Improve maker FPS", "Improves FPS in character maker at the cost of slower switching between tabs", SystemInfo.processorFrequency < 2700).Value)
-                HarmonyWrapper.PatchAll(typeof(MakerFps));
+            if (!Utilities.FixesConfig.Wrap(Utilities.ConfigSectionFixes, "Improve maker FPS",
+                "Improves FPS in character maker at the cost of slower switching between tabs.", SystemInfo.processorFrequency < 2700).Value)
+                return;
+
+            HarmonyWrapper.PatchAll(typeof(MakerFps));
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CustomScene), "Start")]

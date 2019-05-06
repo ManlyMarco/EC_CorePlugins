@@ -21,6 +21,10 @@ namespace EC.Core.Fixes.ShaderDropdown
 
         private void Awake()
         {
+            if (!Utilities.FixesConfig.Wrap(Utilities.ConfigSectionFixes, "Fix shader dropdown menu",
+                "Fixes the shader selection menu going off-screen when there are many modded shaders installed.", true).Value)
+                return;
+
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 

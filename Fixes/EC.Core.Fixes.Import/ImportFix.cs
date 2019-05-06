@@ -14,7 +14,14 @@ namespace EC.Core.Fixes.Import
         public const string PluginName = "Import Fixes";
         public const string Version = Metadata.PluginsVersion;
 
-        private void Start() => HarmonyWrapper.PatchAll(typeof(ImportFix));
+        private void Start()
+        {
+            if (!Utilities.FixesConfig.Wrap(Utilities.ConfigSectionFixes, "Disable card import checks",
+                "Prevents the game from crashing or stripping some modded data when importing KK cards.", true).Value)
+                return;
+
+            HarmonyWrapper.PatchAll(typeof(ImportFix));
+        }
 
         /// <summary>
         /// Prevent items with sideloader-assigned IDs from being removed
