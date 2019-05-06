@@ -60,8 +60,8 @@ namespace EC.Core.Sideloader
             ResourceRedirector.ResourceRedirector.AssetResolvers.Add(RedirectHook);
 
             MissingModWarning = Config.Wrap("General", "Show missing mod warnings", "Whether missing mod warnings will be displayed on screen. Messages will still be written to the log.", true);
-            DebugLogging = Config.Wrap("Debug", "Debug logging", "Enable additional logging useful for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase load and save times noticeably and will result in very large log sizes.", false);
-            DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase game start up time and will result in very large log sizes.", false);
+            DebugLogging = Config.Wrap("Debug", "Debug logging", "Enable additional logging useful for debugging issues with Sideloader and sideloader mods.\nWarning: Will increase load and save times noticeably and will result in very large log sizes.", false);
+            DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\nWarning: Will increase game start up time and will result in very large log sizes.", false);
 
             AdditionalModsDirectory = Config.Wrap("General", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
 
