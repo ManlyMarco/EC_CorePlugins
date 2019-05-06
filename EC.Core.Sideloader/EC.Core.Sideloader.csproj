@@ -120,7 +120,7 @@
     <Error Condition="!Exists('..\packages\ILRepack.Lib.MSBuild.Task.2.0.16.1\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.Lib.MSBuild.Task.2.0.16.1\build\ILRepack.Lib.MSBuild.Task.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>del /q /f "$(TargetDir)ICSharpCode.SharpZipLib.pdb"
-del /q /f "$(TargetDir)ICSharpCode.SharpZipLib.xml"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -22,5 +22,8 @@
 		/>
 
 		<Delete Files="@(InputAssemblies)" />
+    
+    <Delete Files="$(OutputPath)\ICSharpCode.SharpZipLib.pdb" />
+    <Delete Files="$(OutputPath)\ICSharpCode.SharpZipLib.xml" />
   </Target>
 </Project>
