@@ -43,5 +43,11 @@ Fixes some errors that can occur when importing modded items on characters.
 ### Maker FPS optimization
 Improves FPS in character maker at the cost of slower switching between tabs. Automatically enables for low end PCs.
 
+### NodeUnlock
+Unlock the limit of 50 nodes in a single scene file and allow unlimited amount nodes.
+
 ### Null Checks
 Additional error handling for problems caused by some modded clothing and hair items.
+
+### FixShaderDropdown
+Fixes the shader selection menu going off-screen when there are many modded shaders installed. Adaptation of plugin koikoi.happy.nu.fix_shader_dropdown.
