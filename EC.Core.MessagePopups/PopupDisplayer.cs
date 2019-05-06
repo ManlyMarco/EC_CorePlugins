@@ -22,7 +22,7 @@ namespace EC.Core.MessagePopups
 
         public PopupDisplayer()
         {
-            Enabled = Config.Wrap(null, "Show messages in UI", "Allow plugins to show pop-up messages", true);
+            Enabled = Config.Wrap("General", "Show messages in UI", "Allow plugins to show pop-up messages", true);
             BepInEx.Logging.Logger.Listeners.Add(new MessageLogListener());
         }
 

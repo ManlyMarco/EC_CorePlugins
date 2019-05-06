@@ -59,11 +59,11 @@ namespace EC.Core.Sideloader
             UniversalAutoResolver.Hooks.InstallHooks();
             ResourceRedirector.ResourceRedirector.AssetResolvers.Add(RedirectHook);
 
-            MissingModWarning = Config.Wrap("", "Show missing mod warnings", "Whether missing mod warnings will be displayed on screen. Messages will still be written to the log.", true);
+            MissingModWarning = Config.Wrap("General", "Show missing mod warnings", "Whether missing mod warnings will be displayed on screen. Messages will still be written to the log.", true);
             DebugLogging = Config.Wrap("Debug", "Debug logging", "Enable additional logging useful for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase load and save times noticeably and will result in very large log sizes.", false);
             DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\n\n Warning: Will increase game start up time and will result in very large log sizes.", false);
 
-            AdditionalModsDirectory = Config.Wrap("", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
+            AdditionalModsDirectory = Config.Wrap("General", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
 
             var modDirectory = Path.Combine(Paths.GameRootPath, "mods");
 
@@ -80,6 +80,10 @@ namespace EC.Core.Sideloader
         {
             try
             {
+                // Don't look for the KK modpack if a copy of it is already installed in EC
+                if (Directory.Exists(Path.Combine(Paths.GameRootPath, @"mods\Sideloader Modpack")))
+                    return string.Empty;
+
                 using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Illusion\Koikatu\koikatu"))
                 {
                     if (key?.GetValue("INSTALLDIR") is string dir)

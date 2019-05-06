@@ -66,17 +66,18 @@ namespace EC.Core.Screencap
             KeyCapture360 = new SavedKeyboardShortcut(Config, "Take 360 screenshot", "Captures a 360 screenshot around current camera. The created image is in equirectangular format and can be viewed by most 360 image viewers (e.g. Google Cardboard).", new KeyboardShortcut(KeyCode.F11, KeyCode.LeftControl));
             KeyGui = new SavedKeyboardShortcut(Config, "Open settings window", null, new KeyboardShortcut(KeyCode.F11, KeyCode.LeftShift));
 
-            ResolutionX = Config.Wrap("Rendered screenshot output resolution", "Horizontal (Width in px)", null, Screen.width);
-            ResolutionY = Config.Wrap("Rendered screenshot output resolution", "Vertical (Height in px)", null, Screen.height);
+            ResolutionX = Config.Wrap("Render Output Resolution", "Horizontal", "Horizontal size (width) of rendered screenshots in pixels. Doesn't affect UI and 360 screenshots.", Screen.width);
+            ResolutionY = Config.Wrap("Render Output Resolution", "Vertical", "Vertical size (height) of rendered screenshots in pixels. Doesn't affect UI and 360 screenshots.", Screen.height);
             ResolutionX.SettingChanged += (sender, args) => _resolutionXBuffer = ResolutionX.Value.ToString();
             ResolutionY.SettingChanged += (sender, args) => _resolutionYBuffer = ResolutionY.Value.ToString();
 
-            Resolution360 = Config.Wrap(null, "360 screenshot resolution", "Horizontal resolution of 360 screenshots. Decrease if you have issues. WARNING: Memory usage can get VERY high - 4096 needs around 4GB of free RAM/VRAM to take, 8192 will need much more.", 4096);
+            Resolution360 = Config.Wrap("360 Screenshots", "360 screenshot resolution", "Horizontal resolution (width) of 360 degree/panorama screenshots. Decrease if you have issues. WARNING: Memory usage can get VERY high - 4096 needs around 4GB of free RAM/VRAM to create, 8192 will need much more.", 4096);
 
-            DownscalingRate = Config.Wrap(null, "Screenshot upsampling ratio", "Capture screenshots in a higher resolution and then downscale them to desired size. Prevents aliasing, perserves small details and gives a smoother result, but takes longer to create.", 2);
-            CardDownscalingRate = Config.Wrap(null, "Card image upsampling ratio", "Capture character card images in a higher resolution and then downscale them to desired size. Prevents aliasing, perserves small details and gives a smoother result, but takes longer to create.", 3);
-            CaptureAlpha = Config.Wrap(null, "Transparency in rendered screenshots", "Replaces background with transparency in rendered image. Works only if there are no 3D objects covering the background (e.g. the map). Works well in character creator and studio.", true);
-            ScreenshotMessage = Config.Wrap(null, "Show messages on screen", "Whether screenshot messages will be displayed on screen. Messages will still be written to the log.", true);
+            DownscalingRate = Config.Wrap("Render Settings", "Screenshot upsampling ratio", "Capture screenshots in a higher resolution and then downscale them to desired size. Prevents aliasing, perserves small details and gives a smoother result, but takes longer to create.", 2);
+            CardDownscalingRate = Config.Wrap("Render Settings", "Card image upsampling ratio", "Capture character card images in a higher resolution and then downscale them to desired size. Prevents aliasing, perserves small details and gives a smoother result, but takes longer to create.", 3);
+            CaptureAlpha = Config.Wrap("Render Settings", "Transparency in rendered screenshots", "Replaces background with transparency in rendered image. Works only if there are no 3D objects covering the background (e.g. the map). Works well in character creator and studio.", true);
+
+            ScreenshotMessage = Config.Wrap("General", "Show messages on screen", "Whether screenshot messages will be displayed on screen. Messages will still be written to the log.", true);
 
             SceneManager.sceneLoaded += (s, a) => InstallSceenshotHandler();
             InstallSceenshotHandler();

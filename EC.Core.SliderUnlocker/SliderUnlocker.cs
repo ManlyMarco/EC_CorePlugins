@@ -45,8 +45,8 @@ namespace EC.Core.SliderUnlocker
 
         public SliderUnlocker()
         {
-            Minimum = Config.Wrap("Slider Config", "Minimum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 0);
-            Maximum = Config.Wrap("Slider Config", "Maximum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 100);
+            Minimum = Config.Wrap("Slider Limits", "Minimum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 0);
+            Maximum = Config.Wrap("Slider Limits", "Maximum slider value", "Changes will take effect next time the editor is loaded or a character is loaded.", 100);
         }
 
         #endregion
