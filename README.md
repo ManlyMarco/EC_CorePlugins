@@ -2,10 +2,9 @@
 Collection of essential plugins for Emotion Creators. They are still under heavy development and will most likely have bugs or missing features. To get the latest nightlies visit https://builds.bepis.io/ec_coreplugins
 
 ## Installation
-1. Install [Bepinex 5](https://builds.bepis.io/bepinex_be) - BepInEx build for post-Unity 2018 game (x64)
-2. In \BepInEx\config\BepInEx.cfg set Assembly = UnityEngine.CoreModule.dll
-3. Download the [latest build of EC_CorePlugins](https://builds.bepis.io/ec_coreplugins)
-5. Extract the plugin .zip file to your EmotionCreators folder
+1. Install [Bepinex 5](https://builds.bepis.io/bepinex_be) - BepInEx build for post-Unity 2018 game (x64) - Build 133
+2. Download the [latest release of EC_CorePlugins](https://github.com/ManlyMarco/EC_CorePlugins/releases)
+3. Extract the plugin .zip file to your EmotionCreators folder
 
 ## Plugin descriptions
 ### ExtensibleSaveFormat
