@@ -42,11 +42,11 @@ namespace EC.Core.Fixes.Import
             __result = true;
             return false;
         }
-        
+
         /// <summary>
         /// Fix null exception when importing characters with modded clothes under some conditions
         /// </summary>
-        [HarmonyTranspiler, HarmonyPatch(typeof(ChaFileControl), nameof(ChaFileControl.CheckUsedPackageCoordinate))]
+        [HarmonyTranspiler, HarmonyPatch(typeof(ChaFileControl), nameof(ChaFileControl.CheckUsedPackageCoordinate), typeof(ChaFileCoordinate), typeof(HashSet<int>))]
         public static IEnumerable<CodeInstruction> ImportNullFixTpl(IEnumerable<CodeInstruction> instructions)
         {
             var target = AccessTools.Property(typeof(ListInfoBase), nameof(ListInfoBase.Kind)).GetMethod;
