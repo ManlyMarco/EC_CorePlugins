@@ -66,8 +66,6 @@ namespace EC.Core.ResourceRedirector
         }
         #endregion
 
-        private static readonly HashSet<string> ForbiddenAssetBundles = new HashSet<string> { "chara/mm_base.unity3d", "chara/oo_base.unity3d" };
-
         #region Asset Loading
         [HarmonyPrefix, HarmonyPatch(typeof(AssetBundleManager), nameof(AssetBundleManager.LoadAsset), new[] { typeof(string), typeof(string), typeof(Type), typeof(string) })]
         public static bool LoadAssetPreHook(ref AssetBundleLoadAssetOperation __result, ref string assetBundleName, ref string assetName, Type type, string manifestAssetBundleName)
@@ -168,7 +166,7 @@ namespace EC.Core.ResourceRedirector
             List<CodeInstruction> instructionsList = instructions.ToList();
             MethodInfo LoadMethod = typeof(AssetBundle).GetMethod(nameof(AssetBundle.LoadFromFile), AccessTools.all, null, new[] { typeof(string) }, null);
 
-            int IndexLoadFromFile = instructionsList.FindIndex(instruction => instruction.opcode == OpCodes.Call && instruction.operand == LoadMethod);
+            int IndexLoadFromFile = instructionsList.FindIndex(instruction => instruction.opcode == OpCodes.Call && (MethodInfo)instruction.operand == LoadMethod);
 
             //Switch out a LoadFromFile call
             if (IndexLoadFromFile > 0)
