@@ -48,6 +48,8 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                     {
                         //No match was found
                         Sideloader.Logger.Log(LogLevel.Debug, $"[UAR] Compatibility resolving failed, no match found for ID {kv.Value.GetMethod(structure)} Category {kv.Key.Category}");
+                        if (kv.Key.Category.ToString().Contains("ao_") && Sideloader.KeepMissingAccessories.Value && Manager.Scene.Instance.NowSceneNames.Any(sceneName => sceneName == "CustomScene"))
+                            kv.Value.SetMethod(structure, 1);
                     }
                 }
             }
@@ -95,7 +97,10 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                                 {
                                     //ID found but it conflicts with a vanilla item. Change the ID to avoid conflicts.
                                     ShowGUIDError(extResolve.GUID);
-                                    kv.Value.SetMethod(structure, 999999);
+                                    if (kv.Key.Category.ToString().Contains("ao_") && Sideloader.KeepMissingAccessories.Value && Manager.Scene.Instance.NowSceneNames.Any(sceneName => sceneName == "CustomScene"))
+                                        kv.Value.SetMethod(structure, 1);
+                                    else
+                                        kv.Value.SetMethod(structure, 999999);
                                 }
                                 else
                                 {
@@ -107,7 +112,10 @@ namespace EC.Core.Sideloader.UniversalAutoResolver
                             {
                                 //ID not found. Change the ID to avoid potential future conflicts.
                                 ShowGUIDError(extResolve.GUID);
-                                kv.Value.SetMethod(structure, 999999);
+                                if (kv.Key.Category.ToString().Contains("ao_") && Sideloader.KeepMissingAccessories.Value && Manager.Scene.Instance.NowSceneNames.Any(sceneName => sceneName == "CustomScene"))
+                                    kv.Value.SetMethod(structure, 1);
+                                else
+                                    kv.Value.SetMethod(structure, 999999);
                             }
                         }
                     }

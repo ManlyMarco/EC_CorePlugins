@@ -5,12 +5,12 @@ using EC.Core.Internal;
 using EC.Core.ResourceRedirector;
 using EC.Core.Sideloader.UniversalAutoResolver;
 using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Win32;
 using UnityEngine;
 
 namespace EC.Core.Sideloader
@@ -34,12 +34,13 @@ namespace EC.Core.Sideloader
         protected static HashSet<string> PngFolderList = new HashSet<string>();
         protected static HashSet<string> PngFolderOnlyList = new HashSet<string>();
 
-        internal new static ManualLogSource Logger;
+        internal static new ManualLogSource Logger;
 
         public static ConfigWrapper<bool> MissingModWarning { get; private set; }
         public static ConfigWrapper<bool> DebugLogging { get; private set; }
         public static ConfigWrapper<bool> DebugResolveInfoLogging { get; private set; }
         public static ConfigWrapper<string> AdditionalModsDirectory { get; private set; }
+        public static ConfigWrapper<bool> KeepMissingAccessories { get; private set; }
 
         public Sideloader()
         {
@@ -62,8 +63,8 @@ namespace EC.Core.Sideloader
             MissingModWarning = Config.Wrap("General", "Show missing mod warnings", "Whether missing mod warnings will be displayed on screen. Messages will still be written to the log.", true);
             DebugLogging = Config.Wrap("Debug", "Debug logging", "Enable additional logging useful for debugging issues with Sideloader and sideloader mods.\nWarning: Will increase load and save times noticeably and will result in very large log sizes.", false);
             DebugResolveInfoLogging = Config.Wrap("Debug", "Debug resolve info logging", "Enable verbose logging for debugging issues with Sideloader and sideloader mods.\nWarning: Will increase game start up time and will result in very large log sizes.", false);
-
             AdditionalModsDirectory = Config.Wrap("General", "Additional mods directory", "Additional directory to load zipmods from.", FindKoiZipmodDir());
+            KeepMissingAccessories = Config.Wrap("General", "Keep missing accessories", "Missing accessories will be replaced by a default item with color and position information intact when loaded in the character maker.", false);
 
             var modDirectory = Path.Combine(Paths.GameRootPath, "mods");
 
@@ -133,8 +134,11 @@ namespace EC.Core.Sideloader
                 {
                     archive = new ZipFile(archivePath);
 
-                    if (Manifest.TryLoadFromZip(archive, out Manifest manifest) && (manifest.Game.IsNullOrWhiteSpace() || manifest.Game.ToLower() == GameName))
-                        archives.Add(archive, manifest);
+                    if (Manifest.TryLoadFromZip(archive, out Manifest manifest))
+                        if (manifest.Game.IsNullOrWhiteSpace() || manifest.Game.ToLower() == GameName)
+                            archives.Add(archive, manifest);
+                        else
+                            Logger.Log(LogLevel.Info, $"Not loading archive \"{GetRelativeArchiveDir(archivePath)}\" due to incorrect game specified in manifest.xml");
                 }
                 catch (Exception ex)
                 {
