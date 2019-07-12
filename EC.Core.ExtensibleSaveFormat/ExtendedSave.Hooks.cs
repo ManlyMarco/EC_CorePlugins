@@ -8,7 +8,7 @@ using BepInEx.Harmony;
 using BepInEx.Logging;
 using ChaCustom;
 using Harmony;
-using MessagePack;
+using HEdit;
 
 namespace EC.Core.ExtensibleSaveFormat
 {
@@ -35,23 +35,24 @@ namespace EC.Core.ExtensibleSaveFormat
                 if (info != null && info.version == Version.ToString())
                 {
                     var originalPosition = reader.BaseStream.Position;
-                    var basePosition = originalPosition - header.lstInfo.Sum(x => x.size);
-
-                    reader.BaseStream.Position = basePosition + info.pos;
-
-                    var data = reader.ReadBytes((int)info.size);
-
-                    reader.BaseStream.Position = originalPosition;
-
                     try
                     {
-                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(data);
+                        var basePosition = originalPosition - header.lstInfo.Sum(x => x.size);
+
+                        reader.BaseStream.Position = basePosition + info.pos;
+
+                        var data = reader.ReadBytes((int)info.size);
+
+                        reader.BaseStream.Position = originalPosition;
+
+                        var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(data);
                         _internalCharaDictionary.Set(file, dictionary);
                     }
                     catch (Exception e)
                     {
                         _internalCharaDictionary.Set(file, new Dictionary<string, PluginData>());
                         _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card \"{file.charaFileName}\" - {e.Message}");
+                        reader.BaseStream.Position = originalPosition;
                     }
                 }
                 else
@@ -124,12 +125,13 @@ namespace EC.Core.ExtensibleSaveFormat
 
                     try
                     {
-                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(data);
+                        var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(data);
                         _internalCharaImportDictionary.Set(file, dictionary);
                     }
                     catch (Exception e)
                     {
                         _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card \"{file.charaFileName}\" - {e.Message}");
+                        reader.BaseStream.Position = originalPosition;
                     }
                 }
             }
@@ -186,7 +188,7 @@ namespace EC.Core.ExtensibleSaveFormat
                             if (length > 0)
                             {
                                 byte[] bytes = br.ReadBytes(length);
-                                var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
+                                var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(bytes);
 
                                 _internalCharaImportDictionary.Set(__instance, dictionary);
                             }
@@ -199,10 +201,12 @@ namespace EC.Core.ExtensibleSaveFormat
                     catch (EndOfStreamException)
                     {
                         /* Incomplete/non-existant data */
+                        br.BaseStream.Position = originalPosition;
                     }
                     catch (SystemException)
                     {
                         /* Invalid/unexpected deserialized data */
+                        br.BaseStream.Position = originalPosition;
                     }
                 }
             }
@@ -223,13 +227,27 @@ namespace EC.Core.ExtensibleSaveFormat
             public static void ChaFileSaveFileHook(ChaFile file, BlockHeader header, ref long[] array3)
             {
                 var extendedData = GetAllExtendedData(file);
-                if (extendedData == null)
+                if (extendedData == null || extendedData.Count == 0)
                 {
                     currentlySavingData = null;
                     return;
                 }
 
-                currentlySavingData = MessagePackSerializer.Serialize(extendedData);
+                try
+                {
+                    currentlySavingData = MessagePackSerialize(extendedData);
+                    if (currentlySavingData.LongLength == 0)
+                    {
+                        currentlySavingData = null;
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Warning, $"Failed to save extended data in card. {e.Message}");
+                    currentlySavingData = null;
+                    return;
+                }
 
                 //get offset
                 var offset = array3.Sum();
@@ -255,10 +273,21 @@ namespace EC.Core.ExtensibleSaveFormat
             [HarmonyPatch(typeof(ChaFile), "SaveFile", typeof(BinaryWriter), typeof(bool), typeof(int))]
             public static void ChaFileSaveFilePostHook(ChaFile __instance, bool __result, BinaryWriter bw, bool savePng, int lang)
             {
-                if (!__result || currentlySavingData == null)
+                if (!__result || currentlySavingData == null || currentlySavingData.LongLength == 0)
                     return;
 
-                bw.Write(currentlySavingData);
+                var originalLength = bw.BaseStream.Length;
+                var originalPosition = bw.BaseStream.Position;
+                try
+                {
+                    bw.Write(currentlySavingData);
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Warning, $"Failed to save extended data in card. {e.Message}");
+                    bw.BaseStream.Position = originalPosition;
+                    bw.BaseStream.SetLength(originalLength);
+                }
             }
 
             [HarmonyTranspiler]
@@ -331,35 +360,35 @@ namespace EC.Core.ExtensibleSaveFormat
 
             public static void ChaFileCoordinateLoadHook(ChaFileCoordinate coordinate, BinaryReader br)
             {
-                var pos = br.BaseStream.Position;
+                var originalPosition = br.BaseStream.Position;
                 try
                 {
                     var marker = br.ReadString();
                     var version = br.ReadInt32();
-
                     var length = br.ReadInt32();
-
                     if (marker == Marker && version == Version && length > 0)
                     {
                         var bytes = br.ReadBytes(length);
-                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
-
+                        var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(bytes);
                         _internalCoordinateDictionary.Set(coordinate, dictionary);
                     }
                     else
-                        _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>()); //Overriding with empty data just in case there is some remnant from former loads.
+                    {
+                        _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                        br.BaseStream.Position = originalPosition;
+                    }
                 }
                 catch (EndOfStreamException)
                 {
                     /* Incomplete/non-existant data */
                     _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
-                    br.BaseStream.Position = pos;
+                    br.BaseStream.Position = originalPosition;
                 }
                 catch (InvalidOperationException)
                 {
                     /* Invalid/unexpected deserialized data */
                     _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
-                    br.BaseStream.Position = pos;
+                    br.BaseStream.Position = originalPosition;
                 }
 
                 CoordinateReadEvent(coordinate);
@@ -409,28 +438,32 @@ namespace EC.Core.ExtensibleSaveFormat
 
             public static void KKChaFileCoordinateLoadHook(KoikatsuCharaFile.ChaFileCoordinate coordinate, BinaryReader br)
             {
+                var originalPosition = br.BaseStream.Position;
                 try
                 {
                     var marker = br.ReadString();
                     var version = br.ReadInt32();
-
                     var length = br.ReadInt32();
-
                     if (marker == Marker && version == Version && length > 0)
                     {
                         var bytes = br.ReadBytes(length);
-                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
-
+                        var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(bytes);
                         _internalCoordinateImportDictionary.Set(coordinate, dictionary);
+                    }
+                    else
+                    {
+                        br.BaseStream.Position = originalPosition;
                     }
                 }
                 catch (EndOfStreamException)
                 {
                     /* Incomplete/non-existant data */
+                    br.BaseStream.Position = originalPosition;
                 }
                 catch (InvalidOperationException)
                 {
                     /* Invalid/unexpected deserialized data */
+                    br.BaseStream.Position = originalPosition;
                 }
             }
 
@@ -465,15 +498,113 @@ namespace EC.Core.ExtensibleSaveFormat
                 _logger.Log(LogLevel.Debug, "Coordinate hook!");
 
                 var extendedData = GetAllExtendedData(file);
-                if (extendedData == null)
+                if (extendedData == null || extendedData.Count == 0)
                     return;
 
-                var data = MessagePackSerializer.Serialize(extendedData);
+                var originalLength = bw.BaseStream.Length;
+                var originalPosition = bw.BaseStream.Position;
+                try
+                {
+                    var bytes = MessagePackSerialize(extendedData);
 
-                bw.Write(Marker);
-                bw.Write(Version);
-                bw.Write(data.Length);
-                bw.Write(data);
+                    bw.Write(Marker);
+                    bw.Write(Version);
+                    bw.Write(bytes.Length);
+                    bw.Write(bytes);
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Warning, $"Failed to save extended data in card. {e.Message}");
+                    bw.BaseStream.Position = originalPosition;
+                    bw.BaseStream.SetLength(originalLength);
+                }
+            }
+
+            #endregion
+
+            #endregion
+
+            #region HEditData
+
+            #region Loading
+
+            // HEdit.HEditData
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(HEditData), nameof(HEditData.Load), new[] { typeof(BinaryReader), typeof(int), typeof(YS_Node.NodeControl), typeof(HEditData.InfoData), typeof(bool) })]
+            private static bool HEditDataLoadHook(bool __result, HEditData __instance, ref BinaryReader _reader, ref int _loadKind, ref YS_Node.NodeControl _nodeControl, ref HEditData.InfoData _info, ref bool _isEdit)
+            {
+                var originalPosition = _reader.BaseStream.Position;
+                try
+                {
+                    var marker = _reader.ReadString();
+                    var version = _reader.ReadInt32();
+                    var length = _reader.ReadInt32();
+                    if (marker == Marker && version == Version && length > 0)
+                    {
+                        var bytes = _reader.ReadBytes(length);
+                        var dictionary = MessagePackDeserialize<Dictionary<string, PluginData>>(bytes);
+                        _internalHEditDataDictionary.Set(__instance, dictionary);
+                    }
+                    else
+                    {
+                        _internalHEditDataDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                        _reader.BaseStream.Position = originalPosition;
+                    }
+                }
+                catch (EndOfStreamException)
+                {
+                    /* Incomplete/non-existant data */
+                    _internalHEditDataDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    _reader.BaseStream.Position = originalPosition;
+                }
+                catch (InvalidOperationException)
+                {
+                    /* Invalid/unexpected deserialized data */
+                    _internalHEditDataDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    _reader.BaseStream.Position = originalPosition;
+                }
+
+                HEditDataReadEvent(__instance);
+
+                return __result;
+            }
+
+            #endregion
+
+            #region Saving
+
+            // HEdit.HEditData
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(HEditData), nameof(HEditData.Save), new[] { typeof(BinaryWriter), typeof(YS_Node.NodeControl), typeof(bool) })]
+            private static bool HEditDataSaveHook(bool __result, HEditData __instance, ref BinaryWriter _writer, ref YS_Node.NodeControl _nodeControl, ref bool _isInitUserID)
+            {
+                HEditDataWriteEvent(__instance);
+
+                _logger.Log(LogLevel.Debug, "MapInfo hook!");
+
+                var extendedData = GetAllExtendedData(__instance);
+                if (extendedData == null || extendedData.Count == 0)
+                    return __result;
+
+                var originalLength = _writer.BaseStream.Length;
+                var originalPosition = _writer.BaseStream.Position;
+                try
+                {
+                    var bytes = MessagePackSerialize(extendedData);
+
+                    _writer.Write(Marker);
+                    _writer.Write(Version);
+                    _writer.Write(bytes.Length);
+                    _writer.Write(bytes);
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Warning, $"Failed to save extended data in card. {e.Message}");
+                    _writer.BaseStream.Position = originalPosition;
+                    _writer.BaseStream.SetLength(originalLength);
+                }
+
+                return __result;
             }
 
             #endregion

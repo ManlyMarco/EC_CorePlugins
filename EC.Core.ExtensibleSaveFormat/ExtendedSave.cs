@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
 using EC.Core.Internal;
+using MessagePack;
+using MessagePack.Resolvers;
 
 namespace EC.Core.ExtensibleSaveFormat
 {
@@ -20,22 +22,30 @@ namespace EC.Core.ExtensibleSaveFormat
         /// </summary>
         public static bool LoadEventsEnabled = true;
 
-        private static readonly WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>> _internalCharaDictionary = 
+        #region Fields
+
+        private static readonly WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>> _internalCharaDictionary =
             new WeakKeyDictionary<ChaFile, Dictionary<string, PluginData>>();
 
-        private static readonly WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateDictionary = 
+        private static readonly WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateDictionary =
             new WeakKeyDictionary<ChaFileCoordinate, Dictionary<string, PluginData>>();
 
-        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFile, Dictionary<string, PluginData>> _internalCharaImportDictionary = 
+        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFile, Dictionary<string, PluginData>> _internalCharaImportDictionary =
             new WeakKeyDictionary<KoikatsuCharaFile.ChaFile, Dictionary<string, PluginData>>();
 
-        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateImportDictionary = 
+        private static readonly WeakKeyDictionary<KoikatsuCharaFile.ChaFileCoordinate, Dictionary<string, PluginData>> _internalCoordinateImportDictionary =
             new WeakKeyDictionary<KoikatsuCharaFile.ChaFileCoordinate, Dictionary<string, PluginData>>();
+
+        private static readonly WeakKeyDictionary<HEdit.HEditData, Dictionary<string, PluginData>> _internalHEditDataDictionary =
+            new WeakKeyDictionary<HEdit.HEditData, Dictionary<string, PluginData>>();
+
+        #endregion
 
         #region Events
 
         public delegate void CardEventHandler(ChaFile file);
         public delegate void CoordinateEventHandler(ChaFileCoordinate file);
+        public delegate void MapInfoEventHandler(HEdit.HEditData data);
         public delegate void ImportEventHandler(Dictionary<string, PluginData> importedExtendedData);
 
         public static event CardEventHandler CardBeingSaved;
@@ -54,6 +64,9 @@ namespace EC.Core.ExtensibleSaveFormat
         /// </summary>
         public static event ImportEventHandler CoordinateBeingImported;
 
+        public static event MapInfoEventHandler HEditDataBeingSaved;
+        public static event MapInfoEventHandler HEditDataBeingLoaded;
+
         private void Awake()
         {
             _logger = Logger;
@@ -67,7 +80,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
             foreach (var entry in CardBeingSaved.GetInvocationList())
             {
-                var handler = (CardEventHandler) entry;
+                var handler = (CardEventHandler)entry;
                 try
                 {
                     handler.Invoke(file);
@@ -86,7 +99,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
             foreach (var entry in CardBeingLoaded.GetInvocationList())
             {
-                var handler = (CardEventHandler) entry;
+                var handler = (CardEventHandler)entry;
                 try
                 {
                     handler.Invoke(file);
@@ -104,7 +117,7 @@ namespace EC.Core.ExtensibleSaveFormat
             {
                 foreach (var entry in CardBeingImported.GetInvocationList())
                 {
-                    var handler = (ImportEventHandler) entry;
+                    var handler = (ImportEventHandler)entry;
                     try
                     {
                         handler.Invoke(data);
@@ -124,7 +137,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
             foreach (var entry in CoordinateBeingSaved.GetInvocationList())
             {
-                var handler = (CoordinateEventHandler) entry;
+                var handler = (CoordinateEventHandler)entry;
                 try
                 {
                     handler.Invoke(file);
@@ -143,7 +156,7 @@ namespace EC.Core.ExtensibleSaveFormat
 
             foreach (var entry in CoordinateBeingLoaded.GetInvocationList())
             {
-                var handler = (CoordinateEventHandler) entry;
+                var handler = (CoordinateEventHandler)entry;
                 try
                 {
                     handler.Invoke(file);
@@ -174,16 +187,53 @@ namespace EC.Core.ExtensibleSaveFormat
             }
         }
 
+        private static void HEditDataWriteEvent(HEdit.HEditData data)
+        {
+            if (HEditDataBeingSaved == null)
+                return;
+
+            foreach (var entry in HEditDataBeingSaved.GetInvocationList())
+            {
+                var handler = (MapInfoEventHandler)entry;
+                try
+                {
+                    handler.Invoke(data);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log(LogLevel.Error, $"Subscriber crash in {nameof(ExtendedSave)}.{nameof(HEditDataBeingSaved)} - {ex}");
+                }
+            }
+        }
+
+        private static void HEditDataReadEvent(HEdit.HEditData data)
+        {
+            if (!LoadEventsEnabled || HEditDataBeingLoaded == null)
+                return;
+
+            foreach (var entry in HEditDataBeingLoaded.GetInvocationList())
+            {
+                var handler = (MapInfoEventHandler)entry;
+                try
+                {
+                    handler.Invoke(data);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log(LogLevel.Error, $"Subscriber crash in {nameof(ExtendedSave)}.{nameof(HEditDataBeingLoaded)} - {ex}");
+                }
+            }
+        }
+
         #endregion
+
+        #region Methods
+
+        #region ChaFile
 
         public static Dictionary<string, PluginData> GetAllExtendedData(ChaFile file)
         {
             return _internalCharaDictionary.Get(file);
-        }
-
-        public static Dictionary<string, PluginData> GetAllExtendedData(ChaFileCoordinate file)
-        {
-            return _internalCoordinateDictionary.Get(file);
         }
 
         public static PluginData GetExtendedDataById(ChaFile file, string id)
@@ -201,15 +251,24 @@ namespace EC.Core.ExtensibleSaveFormat
 
         public static void SetExtendedDataById(ChaFile file, string id, PluginData extendedFormatData)
         {
-            var chaDictionary = _internalCharaDictionary.Get(file);
+            var dict = _internalCharaDictionary.Get(file);
 
-            if (chaDictionary == null)
+            if (dict == null)
             {
-                chaDictionary = new Dictionary<string, PluginData>();
-                _internalCharaDictionary.Set(file, chaDictionary);
+                dict = new Dictionary<string, PluginData>();
+                _internalCharaDictionary.Set(file, dict);
             }
 
-            chaDictionary[id] = extendedFormatData;
+            dict[id] = extendedFormatData;
+        }
+
+        #endregion
+
+        #region ChaFileCoordinate
+
+        public static Dictionary<string, PluginData> GetAllExtendedData(ChaFileCoordinate file)
+        {
+            return _internalCoordinateDictionary.Get(file);
         }
 
         public static PluginData GetExtendedDataById(ChaFileCoordinate file, string id)
@@ -227,15 +286,92 @@ namespace EC.Core.ExtensibleSaveFormat
 
         public static void SetExtendedDataById(ChaFileCoordinate file, string id, PluginData extendedFormatData)
         {
-            var chaDictionary = _internalCoordinateDictionary.Get(file);
+            var dict = _internalCoordinateDictionary.Get(file);
 
-            if (chaDictionary == null)
+            if (dict == null)
             {
-                chaDictionary = new Dictionary<string, PluginData>();
-                _internalCoordinateDictionary.Set(file, chaDictionary);
+                dict = new Dictionary<string, PluginData>();
+                _internalCoordinateDictionary.Set(file, dict);
             }
 
-            chaDictionary[id] = extendedFormatData;
+            dict[id] = extendedFormatData;
         }
+
+        #endregion
+
+        #region HEditData
+
+        public static Dictionary<string, PluginData> GetAllExtendedData(HEdit.HEditData data)
+        {
+            return _internalHEditDataDictionary.Get(data);
+        }
+
+        public static PluginData GetExtendedDataById(HEdit.HEditData data, string id)
+        {
+            if (data == null || id == null)
+                return null;
+
+            var dict = _internalHEditDataDictionary.Get(data);
+
+            if (dict != null && dict.TryGetValue(id, out var extendedSection))
+                return extendedSection;
+
+            return null;
+        }
+
+        public static void SetExtendedDataById(HEdit.HEditData data, string id, PluginData extendedFormatData)
+        {
+            var dict = _internalHEditDataDictionary.Get(data);
+
+            if (dict == null)
+            {
+                dict = new Dictionary<string, PluginData>();
+                _internalHEditDataDictionary.Set(data, dict);
+            }
+
+            dict[id] = extendedFormatData;
+        }
+
+        #endregion
+
+        #region Helper
+
+        public static byte[] MessagePackSerialize<T>(T obj)
+        {
+            try
+            {
+                return MessagePackSerializer.Serialize(obj, StandardResolver.Instance);
+            }
+            catch (FormatterNotRegisteredException)
+            {
+                return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Instance);
+            }
+            catch (InvalidOperationException)
+            {
+                _logger.Log(LogLevel.Warning, "Only primitive types are supported. Serialize your data first.");
+                throw;
+            }
+        }
+
+        public static T MessagePackDeserialize<T>(byte[] obj)
+        {
+            try
+            {
+                return MessagePackSerializer.Deserialize<T>(obj, StandardResolver.Instance);
+            }
+            catch (FormatterNotRegisteredException)
+            {
+                return MessagePackSerializer.Deserialize<T>(obj, ContractlessStandardResolver.Instance);
+            }
+            catch (InvalidOperationException)
+            {
+                _logger.Log(LogLevel.Warning, "Only primitive types are supported. Serialize your data first.");
+                throw;
+            }
+        }
+
+        #endregion
+
+        #endregion
     }
 }
