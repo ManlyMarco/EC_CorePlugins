@@ -8,6 +8,8 @@ using BepInEx.Harmony;
 using BepInEx.Logging;
 using ChaCustom;
 using Harmony;
+using HEdit;
+using Map;
 using MessagePack;
 
 namespace EC.Core.ExtensibleSaveFormat
@@ -22,6 +24,8 @@ namespace EC.Core.ExtensibleSaveFormat
             public static void InstallHooks()
             {
                 HarmonyWrapper.PatchAll(typeof(Hooks));
+
+                PatchBasePartHooks();
             }
 
             #region ChaFile
@@ -336,18 +340,17 @@ namespace EC.Core.ExtensibleSaveFormat
                 {
                     var marker = br.ReadString();
                     var version = br.ReadInt32();
-
                     var length = br.ReadInt32();
-
                     if (marker == Marker && version == Version && length > 0)
                     {
                         var bytes = br.ReadBytes(length);
                         var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
-
                         _internalCoordinateDictionary.Set(coordinate, dictionary);
                     }
                     else
-                        _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>()); //Overriding with empty data just in case there is some remnant from former loads.
+                    {
+                        _internalCoordinateDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    }
                 }
                 catch (EndOfStreamException)
                 {
@@ -409,29 +412,33 @@ namespace EC.Core.ExtensibleSaveFormat
 
             public static void KKChaFileCoordinateLoadHook(KoikatsuCharaFile.ChaFileCoordinate coordinate, BinaryReader br)
             {
+                var pos = br.BaseStream.Position;
                 try
                 {
                     var marker = br.ReadString();
                     var version = br.ReadInt32();
-
                     var length = br.ReadInt32();
-
                     if (marker == Marker && version == Version && length > 0)
                     {
                         var bytes = br.ReadBytes(length);
                         var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
-
                         _internalCoordinateImportDictionary.Set(coordinate, dictionary);
                     }
                 }
                 catch (EndOfStreamException)
                 {
                     /* Incomplete/non-existant data */
+                    _internalCoordinateImportDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    br.BaseStream.Position = pos;
                 }
                 catch (InvalidOperationException)
                 {
                     /* Invalid/unexpected deserialized data */
+                    _internalCoordinateImportDictionary.Set(coordinate, new Dictionary<string, PluginData>());
+                    br.BaseStream.Position = pos;
                 }
+
+                //CoordinateImportEvent(coordinate);
             }
 
             #endregion
@@ -468,12 +475,165 @@ namespace EC.Core.ExtensibleSaveFormat
                 if (extendedData == null)
                     return;
 
-                var data = MessagePackSerializer.Serialize(extendedData);
+                var bytes = MessagePackSerializer.Serialize(extendedData);
 
                 bw.Write(Marker);
                 bw.Write(Version);
-                bw.Write(data.Length);
-                bw.Write(data);
+                bw.Write(bytes.Length);
+                bw.Write(bytes);
+            }
+
+            #endregion
+
+            #endregion
+
+            #region BasePart
+
+            #region Patching
+
+            private static void PatchBasePartHooks()
+            {
+                foreach (var type in typeof(BasePart).Assembly.GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(BasePart)))
+                    {
+                        var originalLoadInfo = type.GetMethod("Load", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(BinaryReader), typeof(Version) }, null);
+                        var postfixLoadInfo = typeof(Hooks).GetMethod(nameof(BasePartLoadHook));
+                        HarmonyWrapper.DefaultInstance.Patch(originalLoadInfo, null, new HarmonyMethod(postfixLoadInfo));
+
+                        var originalSaveInfo = type.GetMethod("Save", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(BinaryWriter) }, null);
+                        var postfixSaveInfo = typeof(Hooks).GetMethod(nameof(BasePartSaveHook));
+                        HarmonyWrapper.DefaultInstance.Patch(originalSaveInfo, null, new HarmonyMethod(postfixSaveInfo));
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Loading
+
+            private static bool BasePartLoadHook(bool __result, BasePart __instance, ref BinaryReader _reader, ref Version _dataVersion)
+            {
+                var pos = _reader.BaseStream.Position;
+                try
+                {
+                    var marker = _reader.ReadString();
+                    var version = _reader.ReadInt32();
+                    var length = _reader.ReadInt32();
+                    if (marker == Marker && version == Version && length > 0)
+                    {
+                        var bytes = _reader.ReadBytes(length);
+                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
+                        _internalBasePartDictionary.Set(__instance, dictionary);
+                    }
+                    else
+                    {
+                        _internalBasePartDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _internalBasePartDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card. BasePart: \"{__instance.name}\" - {ex.Message}");
+                    _reader.BaseStream.Position = pos;
+                }
+
+                BasePartReadEvent(__instance);
+
+                return __result;
+            }
+
+            #endregion
+
+            #region Saving
+
+            private static bool BasePartSaveHook(bool __result, BasePart __instance, ref BinaryWriter _writer)
+            {
+                BasePartWriteEvent(__instance);
+
+                _logger.Log(LogLevel.Debug, "BasePart hook!");
+
+                var extendedData = GetAllExtendedData(__instance);
+                if (extendedData == null)
+                    return __result;
+
+                var bytes = MessagePackSerializer.Serialize(extendedData);
+
+                _writer.Write(Marker);
+                _writer.Write(Version);
+                _writer.Write(bytes.Length);
+                _writer.Write(bytes);
+
+                return __result;
+            }
+
+            #endregion
+
+            #endregion
+
+            #region MapInfo
+
+            #region Loading
+
+            // Map.MapInfo
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(MapInfo), nameof(MapInfo.Load), new[] { typeof(BinaryReader), typeof(bool) })]
+            private static bool MapInfoLoadHook(bool __result, MapInfo __instance, ref BinaryReader _reader, ref bool _png)
+            {
+                var pos = _reader.BaseStream.Position;
+                try
+                {
+                    var marker = _reader.ReadString();
+                    var version = _reader.ReadInt32();
+                    var length = _reader.ReadInt32();
+                    if (marker == Marker && version == Version && length > 0)
+                    {
+                        var bytes = _reader.ReadBytes(length);
+                        var dictionary = MessagePackSerializer.Deserialize<Dictionary<string, PluginData>>(bytes);
+                        _internalMapInfoDictionary.Set(__instance, dictionary);
+                    }
+                    else
+                    {
+                        _internalMapInfoDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _internalMapInfoDictionary.Set(__instance, new Dictionary<string, PluginData>());
+                    _logger.Log(LogLevel.Warning, $"Invalid or corrupted extended data in card. MapInfo: \"{__instance.name}\" - {ex.Message}");
+                    _reader.BaseStream.Position = pos;
+                }
+
+                MapInfoReadEvent(__instance);
+
+                return __result;
+            }
+
+            #endregion
+
+            #region Saving
+
+            // Map.MapInfo
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(MapInfo), nameof(MapInfo.Save), new[] { typeof(BinaryWriter), typeof(bool) })]
+            private static bool MapInfoSaveHook(bool __result, MapInfo __instance, ref BinaryWriter _writer, ref bool _png)
+            {
+                MapInfoWriteEvent(__instance);
+
+                _logger.Log(LogLevel.Debug, "MapInfo hook!");
+
+                var extendedData = GetAllExtendedData(__instance);
+                if (extendedData == null)
+                    return __result;
+
+                var bytes = MessagePackSerializer.Serialize(extendedData);
+
+                _writer.Write(Marker);
+                _writer.Write(Version);
+                _writer.Write(bytes.Length);
+                _writer.Write(bytes);
+
+                return __result;
             }
 
             #endregion
