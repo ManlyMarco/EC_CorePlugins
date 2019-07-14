@@ -52,6 +52,10 @@
       <HintPath>..\lib\BepInEx.Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="IL">
+      <HintPath>..\lib\IL.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="UnityEngine">
